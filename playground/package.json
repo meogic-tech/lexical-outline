@@ -1,0 +1,23 @@
+{
+  "name": "playground",
+  "description": "playground for show lexical-outline",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "author": "warren",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "father-build"
+  },
+  "dependencies": {
+    "lexical-outline": "workspace:*"
+  }
+}
