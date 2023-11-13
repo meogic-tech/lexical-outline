@@ -3,7 +3,16 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preinstall": "npx only-allow pnpm",
+    "build": "pnpm --filter=@meogic/* run build",
+    "clear": "rimraf 'packages/*/{lib,node_modules}' && rimraf node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && pnpm release:only",
+    "release:only": "changeset publish --registry=https://registry.npmjs.com/"
+  },
+  "engines": {
+    "node": ">=14.19.0"
   },
   "repository": {
     "type": "git",
@@ -16,6 +25,12 @@
   },
   "homepage": "https://github.com/meogic-tech/lexical-outline#readme",
   "devDependencies": {
-    "father-build": "^1.22.5"
+    "@changesets/cli": "^2.26.2",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.53.0",
+    "father-build": "^1.22.5",
+    "lint-staged": "^15.1.0",
+    "typescript": "^5.2.2"
   }
 }
