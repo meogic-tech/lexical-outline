@@ -32,5 +32,8 @@
     "father-build": "^1.22.5",
     "lint-staged": "^15.1.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "lexical": "^0.12.4"
   }
 }

@@ -6,8 +6,8 @@
   "type": "module",
   "author": "warren",
   "license": "ISC",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "es/index.js",
+  "typings": "es/index.d.ts",
   "files": [
     "lib"
   ],

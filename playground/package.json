@@ -15,9 +15,24 @@
     "access": "public"
   },
   "scripts": {
-    "build": "father-build"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "lexical-outline": "workspace:*"
+    "@lexical/code": "^0.12.4",
+    "@lexical/hashtag": "^0.12.4",
+    "@lexical/link": "^0.12.4",
+    "@lexical/list": "^0.12.4",
+    "@lexical/rich-text": "^0.12.4",
+    "@meogic/lexical-outline": "workspace:^0.0.1",
+    "lexical-vue": "^0.7.0",
+    "vue": "^3.3.8",
+    "yjs": "^13.6.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.0",
+    "sass": "^1.69.5",
+    "vite": "^5.0.0"
   }
 }

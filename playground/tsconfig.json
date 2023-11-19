@@ -1,30 +1,51 @@
 {
-  "include": ["src", "types", "test"],
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2020",
     "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
-    "rootDir": "./",
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "jsx": "preserve",
     "moduleResolution": "node",
-    "baseUrl": "./",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "sourceMap": false,
+    "isolatedModules": false,
+    "noImplicitThis": true,
+    "strictNullChecks": false,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env",
+      "mocha",
+      "chai",
+      "jest",
+      "jsdom"
+    ],
+    "typeRoots": ["globals.d.ts"],
     "paths": {
-      "*": ["src/*", "node_modules/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "jsx": "react",
-    "esModuleInterop": true
-  }
+    "lib": [
+      "ES2020",
+      "esnext",
+      "dom",
+      "dom.iterable",
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "globals.d.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*"
+  ]
 }
