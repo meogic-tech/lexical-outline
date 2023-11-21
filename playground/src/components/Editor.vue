@@ -15,20 +15,26 @@ import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeHighlightNode, CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { HashtagNode } from '@lexical/hashtag'
-import fun2 from '@meogic/lexical-outline'
+import BParagraphNode,{$createBParagraphNode} from '@meogic/lexical-outline'
+import {onUnmounted,onMounted} from 'vue'
 
+let unregister: () => void
 
 
 function preOutineText() {
   const root = $getRoot()
-  fun2()
+
+  
   if (root.getFirstChild() === null) {
     const heading = $createHeadingNode('h1')
+    const outline = $createBParagraphNode('123');
+    console.log(outline)
     heading.append($createTextNode('Welcome to the playground'))
     root.append(heading)
     root.append(
         $createParagraphNode()
             .append($createTextNode('aaaa'))
+            
     )
   }
 }
@@ -40,6 +46,7 @@ const config = {
     placeholder: 'editor-placeholder',
     paragraph: 'editor-paragraph',
     quote: 'editor-quote',
+    bParagraph: 'editor-bParagraph',
     heading: {
       h1: 'editor-heading-h1',
       h2: 'editor-heading-h2',
@@ -110,6 +117,7 @@ const config = {
     AutoLinkNode,
     LinkNode,
     HashtagNode,
+    BParagraphNode
   ],
   editable: true,
   editorState: preOutineText,
@@ -118,6 +126,11 @@ const config = {
 function onError(error: Error) {
   throw error
 }
+
+onUnmounted(() => {
+  unregister()
+  document.removeEventListener('keydown', onCommandACallBack)
+})
 </script>
 
 <template>
