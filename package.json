@@ -34,6 +34,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "lexical": "^0.12.4"
+    "@lexical/link": "^0.12.4",
+    "@lexical/mark": "^0.12.4",
+    "lexical": "^0.12.4",
+    "lexical-vue": "^0.7.0",
+    "vue": "^3.3.8",
+    "yjs": "^13.6.8"
   }
 }
