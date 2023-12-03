@@ -15,7 +15,7 @@ import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeHighlightNode, CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { HashtagNode } from '@lexical/hashtag'
-import BParagraphNode,{$createBParagraphNode} from '@meogic/lexical-outline'
+import {$createBParagraphNode,oulineViewPlugin,BParagraphNode} from '@meogic/lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 
 let unregister: () => void
@@ -152,6 +152,8 @@ onUnmounted(() => {
         <LexicalListPlugin />
         <LexicalLinkPlugin />
         <LexicalHashtagPlugin />
+        <oulineViewPlugin
+            />
       </div>
     </div>
   </LexicalComposer>

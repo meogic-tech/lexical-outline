@@ -25,10 +25,7 @@
     "@lexical/link": "^0.12.4",
     "@lexical/list": "^0.12.4",
     "@lexical/rich-text": "^0.12.4",
-    "@meogic/lexical-outline": "workspace:^0.0.1",
-    "lexical-vue": "^0.7.0",
-    "vue": "^3.3.8",
-    "yjs": "^13.6.8"
+    "@meogic/lexical-outline": "workspace:^0.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",
