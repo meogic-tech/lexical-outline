@@ -9,33 +9,41 @@ import {
   LexicalLinkPlugin,
   LexicalListPlugin,
   LexicalRichTextPlugin,
+  LexicalTreeViewPlugin
 } from 'lexical-vue'
 import { $createHeadingNode, HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeHighlightNode, CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { HashtagNode } from '@lexical/hashtag'
-import {$createBParagraphNode,oulineViewPlugin,BParagraphNode} from '@meogic/lexical-outline'
+import {
+  $createBParagraphNode,
+  OutlineViewPlugin,
+  OutlineBulletIconPlugin,
+  BParagraphNode,
+  BulletIconNode,
+  $createBulletIconNode
+} from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 
 let unregister: () => void
 
 
-function preOutineText() {
+function preOutlineText() {
   const root = $getRoot()
 
   
   if (root.getFirstChild() === null) {
     const heading = $createHeadingNode('h1')
-    const outline = $createBParagraphNode('123');
-    console.log(outline)
+    const outline = $createBParagraphNode('id:1');
+    outline.append($createBulletIconNode())
     heading.append($createTextNode('Welcome to the playground'))
-    root.append(heading)
-    root.append(
-        $createParagraphNode()
-            .append($createTextNode('aaaa'))
-            
-    )
+
+    root
+        .append(outline.append(heading))
+        .append($createBParagraphNode('id:2')
+            .append($createBulletIconNode())
+            .append($createParagraphNode().append($createTextNode('Hello!'))))
   }
 }
 
@@ -117,10 +125,11 @@ const config = {
     AutoLinkNode,
     LinkNode,
     HashtagNode,
-    BParagraphNode
+    BParagraphNode,
+    BulletIconNode,
   ],
   editable: true,
-  editorState: preOutineText,
+  editorState: preOutlineText,
 }
 
 function onError(error: Error) {
@@ -128,8 +137,6 @@ function onError(error: Error) {
 }
 
 onUnmounted(() => {
-  unregister()
-  document.removeEventListener('keydown', onCommandACallBack)
 })
 </script>
 
@@ -147,13 +154,20 @@ onUnmounted(() => {
             </div>
           </template>
         </LexicalRichTextPlugin>
-         <LexicalHistoryPlugin />
+        <LexicalTreeViewPlugin
+            view-class-name="tree-view-output"
+            time-travel-panel-class-name="debug-timetravel-panel"
+            time-travel-button-class-name="debug-timetravel-button"
+            time-travel-panel-slider-class-name="debug-timetravel-panel-slider"
+            time-travel-panel-button-class-name="debug-timetravel-panel-button"
+        />
+        <LexicalHistoryPlugin />
         <LexicalAutoFocusPlugin />
         <LexicalListPlugin />
         <LexicalLinkPlugin />
         <LexicalHashtagPlugin />
-        <oulineViewPlugin
-            />
+        <OutlineViewPlugin />
+        <OutlineBulletIconPlugin />
       </div>
     </div>
   </LexicalComposer>

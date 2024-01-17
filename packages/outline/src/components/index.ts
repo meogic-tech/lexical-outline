@@ -1,4 +1,8 @@
 
 export {
-  default as oulineViewPlugin,
-} from './oulineViewPlugin.vue'
+  default as OutlineViewPlugin
+} from './OutlineViewPlugin.vue';
+
+export {
+  default as OutlineBulletIconPlugin
+} from './OutlineBulletIconPlugin.vue'

@@ -227,7 +227,7 @@ h1 {
   color: rgb(5, 5, 5);
   font-weight: 400;
   margin: 0;
-  margin-bottom: 12px;
+  /*margin-bottom: 12px;*/
   padding: 0;
 }
 
@@ -765,4 +765,43 @@ i.justify-align {
 
 .justify-center {
   justify-content: center;
+}
+
+.editor-outline-item{
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.editor-outline-item:has(.editor-heading-h1) {
+  margin-bottom: 12px;
+}
+
+$spotContainerSize: 30px;
+.editor-outline-item-spot{
+  display: block;
+  width: $spotContainerSize;
+  height: $spotContainerSize;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  flex: none;
+}
+$spotSize: 6px;
+.editor-outline-item-spot::before{
+  content: '';
+  position: absolute;
+  top: ($spotContainerSize - $spotSize) / 2;
+  left: ($spotContainerSize - $spotSize) / 2;
+  width: $spotSize;
+  height: $spotSize;
+  border-radius: $spotSize / 2;
+  background-color: #CCC;
+}
+
+.editor-outline-item>*:last-child {
+  flex: 1;
+}
+::selection {
+  background-color: #ffc0cb; /* 浅粉色 */
+  color: #000; /* 文字颜色为黑色 */
 }
