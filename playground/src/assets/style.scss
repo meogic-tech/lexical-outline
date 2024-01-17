@@ -769,7 +769,7 @@ i.justify-align {
 
 .editor-outline-item{
   display: flex;
-  align-items: center;
+  align-items: start;
   margin-bottom: 6px;
 }
 .editor-outline-item:has(.editor-heading-h1) {

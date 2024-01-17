@@ -1,2 +1,4 @@
 export * from './BulletIconNode';
-export * from './BParagraphNode'
+export * from './OutlineNode';
+export * from './OutlineItemNode';
+export * from './OutlineItemContentNode';

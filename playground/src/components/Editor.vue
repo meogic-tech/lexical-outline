@@ -17,12 +17,15 @@ import { CodeHighlightNode, CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { HashtagNode } from '@lexical/hashtag'
 import {
-  $createBParagraphNode,
   OutlineViewPlugin,
   OutlineBulletIconPlugin,
-  BParagraphNode,
+  OutlineNode,
+  $createOutlineNode,
+  OutlineItemNode,
+  $createOutlineItemNode,
   BulletIconNode,
-  $createBulletIconNode
+  $createBulletIconNode,
+  $createOutlineItemContentNode, OutlineItemContentNode
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 
@@ -34,16 +37,19 @@ function preOutlineText() {
 
   
   if (root.getFirstChild() === null) {
-    const heading = $createHeadingNode('h1')
-    const outline = $createBParagraphNode('id:1');
-    outline.append($createBulletIconNode())
-    heading.append($createTextNode('Welcome to the playground'))
-
-    root
-        .append(outline.append(heading))
-        .append($createBParagraphNode('id:2')
+    const outline = $createOutlineNode()
+    outline
+        .append($createOutlineItemNode('id:1')
             .append($createBulletIconNode())
-            .append($createParagraphNode().append($createTextNode('Hello!'))))
+            .append($createOutlineItemContentNode()
+                .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground'))))
+        )
+        .append($createOutlineItemNode('id:2')
+            .append($createBulletIconNode())
+            .append($createOutlineItemContentNode().append($createParagraphNode().append($createTextNode('Hello!'))))
+        )
+
+    root.append(outline)
   }
 }
 
@@ -125,7 +131,9 @@ const config = {
     AutoLinkNode,
     LinkNode,
     HashtagNode,
-    BParagraphNode,
+    OutlineNode,
+    OutlineItemNode,
+    OutlineItemContentNode,
     BulletIconNode,
   ],
   editable: true,

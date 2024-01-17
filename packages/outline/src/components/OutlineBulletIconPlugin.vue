@@ -17,12 +17,10 @@ const editor = useEditor()
 onMounted(() => {
   editor.registerCommand(SELECTION_CHANGE_COMMAND, () => {
     const selection = $getSelection()
-    console.log("selection", selection);
     if (!$isRangeSelection(selection)) {
       return false
     }
     const nodes = selection.getNodes()
-    console.log("nodes", nodes);
     if (nodes.length === 1 && $isBulletIconNode(nodes[0])) {
       const bulletIconNode = nodes[0]
       let nextSibling = bulletIconNode.getNextSibling()
