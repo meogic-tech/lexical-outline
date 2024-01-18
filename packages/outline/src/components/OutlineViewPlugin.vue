@@ -13,6 +13,7 @@ import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineItemContentNode, $createOutlineNode} from "@/nodes";
+import {$getParentOutline, $getParentOutlineItem} from "@/table-util";
 
 
 const editor = useEditor()
@@ -28,27 +29,32 @@ onMounted(() => {
       }
       // only append
       const anchor = selection.anchor.getNode()
-      const topLevelElement = anchor.getTopLevelElement()
-      if (!$isElementNode(topLevelElement)) {
-        return true
+      const parentOutlineItemNode = $getParentOutlineItem(anchor)
+      if (parentOutlineItemNode === null) {
+        return false
       }
       const outlineItemNode = $createOutlineItemNode('id:2')
       const newParagraphNode = $createParagraphNode()
       outlineItemNode
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))
-      topLevelElement.insertAfter(outlineItemNode)
+      parentOutlineItemNode.insertAfter(outlineItemNode)
       newParagraphNode.select()
       return true
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(KEY_TAB_COMMAND, (payload: KeyboardEvent, editor) => {
       payload.preventDefault()
       const selection = $getSelection()
+      if (!selection) {
+        return false
+      }
       const nodes = selection.getNodes()
       if (nodes.length === 1) {
         const firstNode = nodes[0]
-        let outlineItemNode = firstNode.getParent()?.getParent()?.getParent()
-        console.log("outlineItemNode", outlineItemNode);
+        const outlineItemNode = $getParentOutlineItem(firstNode)
+        if (!outlineItemNode) {
+          return false
+        }
         const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
         if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
           previousOutlineItemNode.getOutlineItemContentNode().append(

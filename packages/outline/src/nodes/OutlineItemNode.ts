@@ -45,9 +45,6 @@ export class OutlineItemNode extends ElementNode {
   createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
     const div = document.createElement('div');
     div.classList.add('editor-outline-item');
-    // div.addEventListener('click', (event) => {
-    //   console.log("click event", event);
-    // })
     return div;
   }
 
