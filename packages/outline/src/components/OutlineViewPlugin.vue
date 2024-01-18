@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {onMounted} from "vue";
+import {onMounted, onUnmounted} from "vue";
 import {useEditor} from "lexical-vue";
 import {
-  $createParagraphNode,
+  $createParagraphNode, $getNodeByKey,
   $getSelection, $isElementNode,
   $isRangeSelection, COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
@@ -12,13 +12,64 @@ import {
 import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode} from "@/nodes/OutlineItemNode";
-import {$createOutlineItemContentNode, $createOutlineNode} from "@/nodes";
+import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 import {$getParentOutline, $getParentOutlineItem} from "@/table-util";
+import {$createOutlineItemContentNode} from "@/nodes";
 
 
 const editor = useEditor()
 
 let unregister: () => void
+
+function indent(): boolean {
+  const selection = $getSelection()
+  if (!selection) {
+    return false
+  }
+  const nodes = selection.getNodes()
+  if (nodes.length === 1) {
+    const firstNode = nodes[0]
+    const outlineItemNode = $getParentOutlineItem(firstNode)
+    if (!outlineItemNode) {
+      return false
+    }
+    const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
+    if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
+      previousOutlineItemNode.getOutlineItemContentNode().append(
+          $createOutlineNode()
+              .append(outlineItemNode)
+      )
+      return true
+    }
+  }
+  return false
+}
+
+function outdent(): boolean {
+  const selection = $getSelection()
+  if (!selection) {
+    return false
+  }
+  const nodes = selection.getNodes()
+  if (nodes.length === 1) {
+    const firstNode = nodes[0]
+    const currentOutlineItemNode = $getParentOutlineItem(firstNode)
+    if (!currentOutlineItemNode) {
+      return false
+    }
+    const outlineNode = $getParentOutline(firstNode)
+    if (!outlineNode) {
+      return false
+    }
+    const parentOutlineNode = $getParentOutline(outlineNode)
+    if (!parentOutlineNode) {
+      return false
+    }
+    parentOutlineNode.append(currentOutlineItemNode)
+    return true
+  }
+  return false
+}
 
 onMounted(() => {
   unregister = mergeRegister(
@@ -42,30 +93,31 @@ onMounted(() => {
       newParagraphNode.select()
       return true
     }, COMMAND_PRIORITY_LOW),
-    editor.registerCommand(KEY_TAB_COMMAND, (payload: KeyboardEvent, editor) => {
-      payload.preventDefault()
-      const selection = $getSelection()
-      if (!selection) {
-        return false
-      }
-      const nodes = selection.getNodes()
-      if (nodes.length === 1) {
-        const firstNode = nodes[0]
-        const outlineItemNode = $getParentOutlineItem(firstNode)
-        if (!outlineItemNode) {
-          return false
-        }
-        const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
-        if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
-          previousOutlineItemNode.getOutlineItemContentNode().append(
-              $createOutlineNode()
-                  .append(outlineItemNode)
-          )
+    editor.registerCommand(KEY_TAB_COMMAND, (event: KeyboardEvent, editor) => {
+      event.preventDefault()
+      return event.shiftKey ? outdent() : indent()
+    }, COMMAND_PRIORITY_LOW),
+    editor.registerMutationListener(OutlineNode, (nodes, payload) => {
+      for (const key of nodes.keys()) {
+        if (nodes.get(key) === 'updated') {
+          const isToRemove = editor.getEditorState().read(() => {
+            const node = $getNodeByKey(key)
+            return $isOutlineNode(node) && node.getChildrenSize() === 0
+          })
+          if (isToRemove) {
+            editor.update(() => {
+              const node = $getNodeByKey(key)
+              node?.remove()
+            })
+          }
         }
       }
-      return false
-    }, COMMAND_PRIORITY_LOW)
+    })
   )
+})
+
+onUnmounted(() => {
+  unregister()
 })
 </script>
 

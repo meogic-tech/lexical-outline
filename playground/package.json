@@ -20,11 +20,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lexical/code": "^0.12.4",
-    "@lexical/hashtag": "^0.12.4",
-    "@lexical/link": "^0.12.4",
-    "@lexical/list": "^0.12.4",
-    "@lexical/rich-text": "^0.12.4",
+    "@lexical/code": "^0.12.6",
+    "@lexical/hashtag": "^0.12.6",
+    "@lexical/link": "^0.12.6",
+    "@lexical/list": "^0.12.6",
+    "@lexical/rich-text": "^0.12.6",
     "lexical-outline": "workspace:*"
   },
   "devDependencies": {
