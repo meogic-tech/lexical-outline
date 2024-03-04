@@ -11,10 +11,17 @@ import {
 } from "lexical";
 import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
-import {$createOutlineItemNode, $isOutlineItemNode} from "@/nodes/OutlineItemNode";
+import {$createOutlineItemNode, $isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
-import {$getParentOutline, $getParentOutlineItem} from "@/table-util";
+import {
+  $getChildOutline,
+  $getChildOutlines,
+  $getChildOutlinesByOutlineNode,
+  $getParentOutline,
+  $getParentOutlineItem
+} from "@/table-util";
 import {$createOutlineItemContentNode} from "@/nodes";
+import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 
 
 const editor = useEditor()
@@ -39,6 +46,8 @@ function indent(): boolean {
           $createOutlineNode()
               .append(outlineItemNode)
       )
+      previousOutlineItemNode.select()
+      editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, false)
       return true
     }
   }
@@ -65,14 +74,76 @@ function outdent(): boolean {
     if (!parentOutlineNode) {
       return false
     }
+    // parentOutlineNode.setCollapsed(false)
     parentOutlineNode.append(currentOutlineItemNode)
     return true
   }
   return false
 }
 
+const onClick = (event: MouseEvent) => {
+  // .editor-outline-chevron-container
+  const target = event.target as HTMLElement
+  const spot = target.closest('.editor-outline-item-spot')
+  if (!spot) {
+    return
+  }
+  for (const [key, dom] of Array.from(editor._keyToDOMMap.entries())) {
+    if (dom === spot) {
+      const isGotoCollapse = editor.getEditorState().read(() => {
+        const node = $getNodeByKey(key)
+        if (!node) {
+          return false
+        }
+        const outlineItem = $getParentOutlineItem(node)
+        if ($isOutlineItemNode(outlineItem)) {
+          return true
+        }
+      })
+      if (isGotoCollapse) {
+        editor.update(() => {
+          const node = $getNodeByKey(key)
+          if (!node) {
+            return false
+          }
+          const outlineItem = $getParentOutlineItem(node)
+          if ($isOutlineItemNode(outlineItem)) {
+            outlineItem.select()
+            editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, !outlineItem.getCollapse())
+          }
+        })
+      }
+    }
+  }
+}
+
 onMounted(() => {
+  editor.getRootElement()!.addEventListener('click', onClick)
   unregister = mergeRegister(
+    editor.registerCommand(COLLAPSE_OUTLINE_COMMAND, (collapse: boolean) => {
+      const selection = $getSelection()
+      if (!$isRangeSelection(selection)) {
+        console.warn('not range selection')
+        return false
+      }
+      const nodes = selection.getNodes()
+      for (let node of nodes) {
+        const outlineNode = $getParentOutline(node)
+        if (!$isOutlineNode(outlineNode)) {
+          continue;
+        }
+        const outlineItemNode = $getParentOutlineItem(outlineNode)
+        if (!$isOutlineItemNode(outlineItemNode)) {
+          continue;
+        }
+        outlineItemNode.setCollapsed(collapse)
+        $getChildOutlines(outlineItemNode).forEach(outline => {
+          outline.setDisplay(!collapse)
+        })
+      }
+
+      return false
+    }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(INSERT_PARAGRAPH_COMMAND, (payload, editor) => {
       const selection = $getSelection()
       if (!$isRangeSelection(selection)) {
@@ -84,12 +155,17 @@ onMounted(() => {
       if (parentOutlineItemNode === null) {
         return false
       }
-      const outlineItemNode = $createOutlineItemNode('id:2')
+      const outlineItemNode = $createOutlineItemNode('id:2', false)
       const newParagraphNode = $createParagraphNode()
       outlineItemNode
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))
-      parentOutlineItemNode.insertAfter(outlineItemNode)
+      const childOutline = $getChildOutline(parentOutlineItemNode)
+      if (childOutline && !parentOutlineItemNode.getCollapse()) {
+        childOutline.splice(0, 0, [outlineItemNode])
+      } else {
+        parentOutlineItemNode.insertAfter(outlineItemNode)
+      }
       newParagraphNode.select()
       return true
     }, COMMAND_PRIORITY_LOW),
@@ -112,12 +188,13 @@ onMounted(() => {
           }
         }
       }
-    })
+    }),
   )
 })
 
 onUnmounted(() => {
   unregister()
+  editor.getRootElement().removeEventListener('click', onClick)
 })
 </script>
 

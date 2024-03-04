@@ -4,7 +4,7 @@ type NodeId = string
 export type SerializedOutlineItemNode = Spread<
   {
     id: NodeId
-    textContent: string
+    collapsed: boolean
   },
   SerializedElementNode
 >;
@@ -15,16 +15,27 @@ export class OutlineItemNode extends ElementNode {
   __selected = false;
   static __selectedClass = 'outline-item';
 
+  __collapsed: boolean
+
   static getType(): string {
     return 'outline-item';
   }
 
   static clone(node: OutlineItemNode): OutlineItemNode {
-    return new OutlineItemNode(node.__id, node.__key)
+    return new OutlineItemNode(node.__id, node.__collapsed, node.__key)
   }
 
   getId(): NodeId {
     return this.__id;
+  }
+
+  setCollapsed(collapsed: boolean): this {
+    this.getWritable().__collapsed = collapsed
+    return this
+  }
+
+  getCollapse(): boolean {
+    return this.getLatest().__collapsed
   }
 
   setSelected() {
@@ -37,9 +48,10 @@ export class OutlineItemNode extends ElementNode {
     self.__selected = false;
   }
 
-  constructor(id: NodeId, key?: NodeKey) {
+  constructor(id: NodeId, collapsed: boolean, key?: NodeKey) {
     super(key);
     this.__id = id;
+    this.__collapsed = collapsed
   }
 
   createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
@@ -56,7 +68,7 @@ export class OutlineItemNode extends ElementNode {
   }
 
   static importJSON(serializedNode: SerializedOutlineItemNode): OutlineItemNode {
-    const node = $createOutlineItemNode(serializedNode.id);
+    const node = $createOutlineItemNode(serializedNode.id, serializedNode.collapsed);
     node.setFormat(serializedNode.format);
     node.setIndent(serializedNode.indent);
     node.setDirection(serializedNode.direction);
@@ -67,6 +79,7 @@ export class OutlineItemNode extends ElementNode {
     return {
       ...super.exportJSON(),
       id: this.getId(),
+      collapsed: this.getCollapse(),
       textContent: ''
     };
   }
@@ -81,8 +94,8 @@ export class OutlineItemNode extends ElementNode {
   }
 }
 
-export function $createOutlineItemNode(id: NodeId, key?: NodeKey): OutlineItemNode {
-  return new OutlineItemNode(id, key);
+export function $createOutlineItemNode(id: NodeId, collapsed: boolean, key?: NodeKey): OutlineItemNode {
+  return new OutlineItemNode(id, collapsed, key);
 }
 
 export function $isOutlineItemNode(

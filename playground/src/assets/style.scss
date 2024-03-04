@@ -71,6 +71,7 @@ h1 {
   tab-size: 1;
   outline: 0;
   padding: 15px 10px;
+  padding-left: 42px;
   caret-color: #444;
 }
 
@@ -776,6 +777,8 @@ i.justify-align {
   display: flex;
   align-items: start;
   margin-bottom: 6px;
+  max-height: 99999px;
+  transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
 }
 .editor-outline-item:has(.editor-heading-h1) {
   //margin-bottom: 12px;
@@ -812,4 +815,20 @@ $spotSize: 6px;
 ::selection {
   background-color: #ffc0cb; /* 浅粉色 */
   color: #000; /* 文字颜色为黑色 */
+}
+.editor-outline-chevron-container{
+  position: absolute;
+  left: -32px;
+  top: 0;
+  opacity: 0;
+  white-space: normal;
+  &:hover{
+    opacity: 1;
+  }
+  button{
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+  }
 }
