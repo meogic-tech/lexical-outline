@@ -4,10 +4,10 @@ import {useEditor} from "lexical-vue";
 import {
   $createParagraphNode, $getNodeByKey,
   $getSelection, $isElementNode,
-  $isRangeSelection, COMMAND_PRIORITY_EDITOR,
+  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
   INSERT_PARAGRAPH_COMMAND,
-  KEY_ENTER_COMMAND, KEY_TAB_COMMAND,
+  KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode,
 } from "lexical";
 import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
@@ -151,12 +151,28 @@ onMounted(() => {
       }
       // only append
       const anchor = selection.anchor.getNode()
+      const newParagraphNode = $createParagraphNode()
+      if ($isTextNode(anchor)) {
+        const anchorOffset = selection.anchor.offset
+        let nodesToMove: LexicalNode[] = [];
+        nodesToMove = anchor.getNextSiblings().reverse();
+        const textContentLength = anchor.getTextContentSize();
+        if (anchorOffset === 0) {
+          nodesToMove.push(anchor);
+        } else if (anchorOffset !== textContentLength) {
+          const [, splitNode] = anchor.splitText(anchorOffset);
+          nodesToMove.push(splitNode);
+        }
+        for (let i = nodesToMove.length - 1; i >= 0; i--) {
+          newParagraphNode.append(nodesToMove[i]);
+        }
+      }
+
       const parentOutlineItemNode = $getParentOutlineItem(anchor)
       if (parentOutlineItemNode === null) {
         return false
       }
       const outlineItemNode = $createOutlineItemNode('id:2', false)
-      const newParagraphNode = $createParagraphNode()
       outlineItemNode
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))
@@ -166,7 +182,7 @@ onMounted(() => {
       } else {
         parentOutlineItemNode.insertAfter(outlineItemNode)
       }
-      newParagraphNode.select()
+      newParagraphNode.select(0, 0)
       return true
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(KEY_TAB_COMMAND, (event: KeyboardEvent, editor) => {

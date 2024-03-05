@@ -51,7 +51,12 @@ function preOutlineText() {
         .append(outlineItemNode
             .append($createBulletIconNode())
             .append($createOutlineItemContentNode()
-                .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground')))
+                .append($createParagraphNode()
+                    .append($createTextNode('This is a '))
+                    .append($createTextNode('playground').setFormat("bold"))
+                    .append($createTextNode(' for the outline plugin.'))
+                )
+                // .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground')))
                 .append(outline2)
             )
         )
