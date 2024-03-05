@@ -15,7 +15,7 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --force",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -24,6 +24,7 @@
     "@lexical/hashtag": "^0.12.6",
     "@lexical/link": "^0.12.6",
     "@lexical/list": "^0.12.6",
+    "@lexical/markdown": "0.12.6",
     "@lexical/rich-text": "^0.12.6",
     "lexical-outline": "workspace:*"
   },

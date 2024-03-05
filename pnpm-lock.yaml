@@ -118,6 +118,9 @@ importers:
       '@lexical/list':
         specifier: ^0.12.6
         version: 0.12.6(lexical@0.12.6)
+      '@lexical/markdown':
+        specifier: 0.12.6
+        version: 0.12.6(@lexical/clipboard@0.12.6)(@lexical/selection@0.12.6)(lexical@0.12.6)
       '@lexical/rich-text':
         specifier: ^0.12.6
         version: 0.12.6(@lexical/clipboard@0.12.6)(@lexical/selection@0.12.6)(@lexical/utils@0.12.6)(lexical@0.12.6)

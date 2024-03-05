@@ -9,8 +9,10 @@ import {
   LexicalLinkPlugin,
   LexicalListPlugin,
   LexicalRichTextPlugin,
-  LexicalTreeViewPlugin
+  LexicalTreeViewPlugin,
+  LexicalMarkdownShortcutPlugin
 } from 'lexical-vue'
+import {TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE} from '@lexical/markdown'
 import { $createHeadingNode, HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeHighlightNode, CodeNode } from '@lexical/code'
@@ -182,6 +184,7 @@ onUnmounted(() => {
         <LexicalHashtagPlugin />
         <OutlineViewPlugin />
         <OutlineBulletIconPlugin />
+        <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>
     </div>
   </LexicalComposer>
