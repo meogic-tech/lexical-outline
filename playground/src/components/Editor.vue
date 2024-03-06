@@ -39,14 +39,14 @@ function preOutlineText() {
 
   
   if (root.getFirstChild() === null) {
-    const outline2 = $createOutlineNode(false)
+    const outline2 = $createOutlineNode(true)
     outline2.append($createOutlineItemNode('id:2', false)
             .append($createBulletIconNode())
             .append($createOutlineItemContentNode().append($createParagraphNode().append($createTextNode('Hello!'))))
         )
 
     const outline = $createOutlineNode(true)
-    const outlineItemNode = $createOutlineItemNode('id:1', true)
+    const outlineItemNode = $createOutlineItemNode('id:1', false)
     outline
         .append(outlineItemNode
             .append($createBulletIconNode())
@@ -58,6 +58,12 @@ function preOutlineText() {
                 )
                 // .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground')))
                 .append(outline2)
+                .append($createOutlineNode(true)
+                    .append($createOutlineItemNode('id:3', false)
+                        .append($createBulletIconNode())
+                        .append($createOutlineItemContentNode().append($createParagraphNode().append($createTextNode('Hello!2'))))
+                    )
+                )
             )
         )
 

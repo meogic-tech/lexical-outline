@@ -4,9 +4,9 @@ import {useEditor} from "lexical-vue";
 import {
   $createParagraphNode, $getNodeByKey,
   $getSelection, $isElementNode,
-  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR,
+  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
-  INSERT_PARAGRAPH_COMMAND,
+  INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode,
 } from "lexical";
 import { mergeRegister } from '@lexical/utils';
@@ -16,7 +16,7 @@ import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNo
 import {
   $getChildOutline,
   $getChildOutlines,
-  $getChildOutlinesByOutlineNode,
+  $getChildOutlinesByOutlineNode, $getOutlineItem,
   $getParentOutline,
   $getParentOutlineItem
 } from "@/table-util";
@@ -189,22 +189,43 @@ onMounted(() => {
       event.preventDefault()
       return event.shiftKey ? outdent() : indent()
     }, COMMAND_PRIORITY_LOW),
-    editor.registerMutationListener(OutlineNode, (nodes, payload) => {
-      for (const key of nodes.keys()) {
-        if (nodes.get(key) === 'updated') {
-          const isToRemove = editor.getEditorState().read(() => {
-            const node = $getNodeByKey(key)
-            return $isOutlineNode(node) && node.getChildrenSize() === 0
-          })
-          if (isToRemove) {
-            editor.update(() => {
-              const node = $getNodeByKey(key)
-              node?.remove()
-            })
-          }
-        }
+    // editor.registerCommand(KEY_DOWN_COMMAND, (event: KeyboardEvent, editor) => {
+    //   console.log("event", event);
+    //   if (event.key === 'Backspace') {
+    //     return true
+    //   }
+    //   return false
+    // }, COMMAND_PRIORITY_HIGH),
+    editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
+      console.log("KEY_BACKSPACE_COMMAND event", event);
+      const selection = $getSelection()
+      if (!$isRangeSelection(selection)) {
+        return false
       }
-    }),
+      if(selection.anchor.offset === 0) {
+        console.log("return true")
+        event.preventDefault()
+        return true
+      }
+      // const nodes = selection.getNodes()
+      // if (nodes.length === 1) {
+      //   const firstNode = nodes[0]
+      //   console.log("firstNode", firstNode);
+      //   const parentOutlineItemNode = $getParentOutlineItem(firstNode)
+      //   if (!parentOutlineItemNode) {
+      //     return false
+      //   }
+      //   const outlineNodes = $getChildOutlines(parentOutlineItemNode)
+      //   console.log("outlineNodes", outlineNodes);
+      //   console.log("selection.anchor.offset", selection.anchor.offset);
+      //
+      //   if (outlineNodes.length > 0 && selection.anchor.offset === 0){
+      //     console.log("return true")
+      //     return true
+      //   }
+      // }
+      return false
+    }, COMMAND_PRIORITY_HIGH),
   )
 })
 
