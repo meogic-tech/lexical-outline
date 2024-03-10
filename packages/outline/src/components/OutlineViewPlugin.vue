@@ -39,11 +39,12 @@ function indent(): boolean {
     }
     const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
     if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
-      previousOutlineItemNode.getOutlineItemContentNode()?.append(
-          $createOutlineNode(true)
-              .append(outlineItemNode)
-      )
-      // outlineItemNode.select()
+      let outlineNode = previousOutlineItemNode.getChildOutlineNode()
+      if (!outlineNode) {
+        outlineNode = $createOutlineNode(true)
+        previousOutlineItemNode.getOutlineItemContentNode()?.append(outlineNode)
+      }
+      outlineNode.append(outlineItemNode)
       editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, false)
       return true
     }
@@ -51,6 +52,24 @@ function indent(): boolean {
   return false
 }
 
+/**
+ * - outline
+ *  - outline-item
+ *    - outline-item-content
+ *      - paragraph
+ *      - outline
+ *        - outline-item
+ *          - outline-item-content
+ *            - paragraph
+ *            - outline
+ *              - outline-item
+ *                - outline-item-content
+ *                  - paragraph
+ *                  ^ cursor
+ *        - outline-item
+ *          - outline-item-content
+ *            - paragraph
+ */
 function outdent(): boolean {
   const selection = $getSelection()
   if (!selection) {
@@ -67,12 +86,15 @@ function outdent(): boolean {
     if (!outlineNode) {
       return false
     }
-    const parentOutlineNode = $getParentOutline(outlineNode)
-    if (!parentOutlineNode) {
+    const parentOutlineItemNode = $getParentOutlineItem(outlineNode)
+    if (!parentOutlineItemNode) {
       return false
     }
     // parentOutlineNode.setCollapsed(false)
-    parentOutlineNode.append(currentOutlineItemNode)
+    parentOutlineItemNode.insertAfter(currentOutlineItemNode)
+    if (outlineNode.getOutlineItemNodes().length === 0) {
+      outlineNode.remove()
+    }
     return true
   }
   return false
