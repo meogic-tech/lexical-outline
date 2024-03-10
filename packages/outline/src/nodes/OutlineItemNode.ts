@@ -1,5 +1,6 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
 import {$isOutlineItemContentNode, OutlineItemContentNode} from "@/nodes/OutlineItemContentNode";
+import {$isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 type NodeId = string
 export type SerializedOutlineItemNode = Spread<
   {
@@ -8,7 +9,22 @@ export type SerializedOutlineItemNode = Spread<
   },
   SerializedElementNode
 >;
-
+/**
+ * outline
+ * - outline-item
+ *  - bullet-icon
+ *  - outline-item-content
+ *    - paragraph
+ *    - outline
+ *      - outline-item
+ *        - bullet-icon
+ *        - outline-item-content
+ *          - paragraph
+ * - outline-item
+ *  - bullet-icon
+ *  - outline-item-content
+ *    - paragraph
+ */
 export class OutlineItemNode extends ElementNode {
   __id: NodeId;
 
@@ -80,17 +96,50 @@ export class OutlineItemNode extends ElementNode {
       ...super.exportJSON(),
       id: this.getId(),
       collapsed: this.getCollapse(),
-      textContent: ''
     };
   }
 
-  getOutlineItemContentNode(): OutlineItemContentNode {
+  getOutlineItemContentNode(): OutlineItemContentNode | null {
     for (let child of this.getChildren()) {
       if ($isOutlineItemContentNode(child)) {
         return child
       }
     }
-    throw new Error('OutlineItemNode has no OutlineItemContentNode child', this)
+    return null
+  }
+
+  getChildOutlineNode(): OutlineNode | null {
+    const outlineContentNode = this.getOutlineItemContentNode()
+    if (outlineContentNode === null) return null
+    const children = outlineContentNode.getChildren()
+    for (const child of children) {
+      if ($isOutlineNode(child)) {
+        return child
+        }
+    }
+    return null
+  }
+
+  getChildrenOutlineItemNodes(): OutlineItemNode[] {
+    const outlineNode = this.getChildOutlineNode()
+    if (outlineNode === null) return []
+    return outlineNode.getOutlineItemNodes()
+  }
+  /**
+   * 包括自身
+   * @param node
+   */
+  getSiblingsOutlineItemNodes(): OutlineItemNode[] {
+    const parent = this.getParent()
+    if (parent === null) return []
+    const children = parent.getChildren()
+    const result: OutlineItemNode[] = []
+    for (const child of children) {
+      if ($isOutlineItemNode(child)) {
+        result.push(child)
+      }
+    }
+    return result
   }
 }
 

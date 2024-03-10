@@ -14,11 +14,7 @@ import {$createBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 import {
-  $getChildOutline,
-  $getChildOutlines,
-  $getChildOutlinesByOutlineNode, $getOutlineItem,
-  $getParentOutline,
-  $getParentOutlineItem
+  $getParentOutline, $getParentOutlineItem,
 } from "@/table-util";
 import {$createOutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
@@ -36,17 +32,18 @@ function indent(): boolean {
   const nodes = selection.getNodes()
   if (nodes.length === 1) {
     const firstNode = nodes[0]
+
     const outlineItemNode = $getParentOutlineItem(firstNode)
     if (!outlineItemNode) {
       return false
     }
     const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
     if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
-      previousOutlineItemNode.getOutlineItemContentNode().append(
-          $createOutlineNode()
+      previousOutlineItemNode.getOutlineItemContentNode()?.append(
+          $createOutlineNode(true)
               .append(outlineItemNode)
       )
-      previousOutlineItemNode.select()
+      // outlineItemNode.select()
       editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, false)
       return true
     }
@@ -137,9 +134,10 @@ onMounted(() => {
           continue;
         }
         outlineItemNode.setCollapsed(collapse)
-        $getChildOutlines(outlineItemNode).forEach(outline => {
-          outline.setDisplay(!collapse)
-        })
+        outlineItemNode.getChildOutlineNode()?.setDisplay(!collapse)
+        // $getChildOutlines(outlineItemNode).forEach(outline => {
+        //   outline.setDisplay(!collapse)
+        // })
       }
 
       return false
@@ -176,7 +174,7 @@ onMounted(() => {
       outlineItemNode
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))
-      const childOutline = $getChildOutline(parentOutlineItemNode)
+      const childOutline = parentOutlineItemNode.getChildOutlineNode()
       if (childOutline && !parentOutlineItemNode.getCollapse()) {
         childOutline.splice(0, 0, [outlineItemNode])
       } else {
@@ -202,11 +200,74 @@ onMounted(() => {
       if (!$isRangeSelection(selection)) {
         return false
       }
+      const nodes = selection.getNodes()
+      if (nodes.length !== 1) {
+        return false
+      }
+      const node = nodes[0]
+      console.log("node", node);
+      const outlineItemNode = $getParentOutlineItem(node)
+      if (!outlineItemNode) {
+        return false
+      }
+      const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
+      console.log("siblingsOutlineItem", siblingsOutlineItem);
+      const outlineNode = $getParentOutline(node)
+      if (!outlineNode) {
+        console.warn("cannot find parent outline by node", node)
+        return false
+      }
+      const rootOutlineNode = outlineNode.getRootOutlineNode()
+      if (!rootOutlineNode)  {
+        console.warn("cannot find root outline by node", outlineNode)
+        return false
+      }
+      if (outlineNode === rootOutlineNode) {
+        if (siblingsOutlineItem.length === 1) {
+          console.debug("cannot backspace because it is the last outline item in root outline node");
+          event.preventDefault()
+          return true
+        }
+        return false
+      }
       if(selection.anchor.offset === 0) {
-        console.log("return true")
+        // 选中上一个
+        const index = siblingsOutlineItem.indexOf(outlineItemNode)
+        if (index === 0) {
+          /**
+           * outline
+           * - outline-item
+           *  - bullet-icon
+           *  - outline-item-content
+           *    - paragraph
+           *    - outline
+           *      - outline-item
+           *        - bullet-icon
+           *        - outline-item-content
+           *          - paragraph
+           *          ^ cursor
+           */
+          const childOutlineNode = outlineItemNode.getChildOutlineNode()
+          const childOutlineItemNodes = childOutlineNode?.getOutlineItemNodes()
+          if (childOutlineItemNodes && childOutlineItemNodes?.length > 0) {
+            console.debug("cannot backspace because it is the first outline item in outline node and it has child outline items");
+            event.preventDefault()
+            return true
+          }
+          console.debug("do not backspace because it will be right default behavior");
+          return false
+        }
+        const previousOutlineItemNode = siblingsOutlineItem[index - 1]
+        if (!previousOutlineItemNode) {
+          return false
+        }
+        const outlineItemContentNode = previousOutlineItemNode.getOutlineItemContentNode()
+        outlineItemContentNode?.getChildAtIndex(0)?.selectEnd()
+        outlineItemNode.remove()
         event.preventDefault()
         return true
       }
+
       // const nodes = selection.getNodes()
       // if (nodes.length === 1) {
       //   const firstNode = nodes[0]

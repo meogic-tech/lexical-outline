@@ -1,5 +1,6 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
 import {$getParentOutline, $getParentOutlineItem} from "@/table-util";
+import {$isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
 type NodeId = string
 export type SerializedOutlineNode = Spread<
   {
@@ -8,6 +9,22 @@ export type SerializedOutlineNode = Spread<
   SerializedElementNode
 >;
 
+/**
+ * outline
+ * - outline-item
+ *  - bullet-icon
+ *  - outline-item-content
+ *    - paragraph
+ *    - outline
+ *      - outline-item
+ *        - bullet-icon
+ *        - outline-item-content
+ *          - paragraph
+ * - outline-item
+ *  - bullet-icon
+ *  - outline-item-content
+ *    - paragraph
+ */
 export class OutlineNode extends ElementNode {
 
   _display: boolean
@@ -67,6 +84,28 @@ export class OutlineNode extends ElementNode {
       display: this._display,
       ...super.exportJSON(),
     };
+  }
+
+  getOutlineItemNodes(): OutlineItemNode[] {
+    const children = this.getChildren()
+    const result: OutlineItemNode[] = []
+    for (const child of children) {
+      if ($isOutlineItemNode(child)) {
+        result.push(child)
+      }
+    }
+    return result
+  }
+
+  /**
+   *  root
+   *   └ (71) outline
+   * @param node
+   */
+  getRootOutlineNode(): OutlineNode {
+    const parent = $getParentOutline(this)
+    if (parent === null) return this
+    return parent.getRootOutlineNode()
   }
 }
 

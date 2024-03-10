@@ -22,22 +22,6 @@ export function $getParentOutlineItem(node: LexicalNode): OutlineItemNode | null
   return $getParentOutlineItem(parent);
 }
 
-export function $getOutlineItem(node: OutlineNode): OutlineItemNode | null {
-  const children = node.getChildren();
-  for (const child of children) {
-    if ($isOutlineItemNode(child)) return child;
-  }
-  return null;
-}
-
-export function $getOutlineItemContent(node: OutlineItemNode): OutlineItemContentNode | null {
-  const children = node.getChildren();
-  for (const child of children) {
-    if ($isOutlineItemContentNode(child)) return child;
-  }
-  return null;
-}
-
 /**
  * (1) outline
  *     ├ (2) outline-item
@@ -48,33 +32,3 @@ export function $getOutlineItemContent(node: OutlineItemNode): OutlineItemConten
  *     |   ├ (15) outline
  * @param node
  */
-export function $getChildOutline(node: OutlineItemNode): OutlineNode | null {
-  const outlineItemContent = $getOutlineItemContent(node);
-  if (outlineItemContent === null) return null;
-  const children = outlineItemContent.getChildren();
-  for (const child of children) {
-    if ($isOutlineNode(child)) return child;
-  }
-  return null;
-}
-
-export function $getChildOutlines(node: OutlineItemNode): OutlineNode[] {
-  const outlineItemContent = $getOutlineItemContent(node);
-  const result: OutlineNode[] = [];
-  if (outlineItemContent === null) return result;
-  const children = outlineItemContent.getChildren();
-  for (const child of children) {
-    if ($isOutlineNode(child)) {
-      result.push(child);
-    }
-  }
-  return result;
-}
-
-export function $getChildOutlinesByOutlineNode(node: OutlineNode): OutlineNode[] {
-  const outlineItem = $getOutlineItem(node)
-  if (outlineItem) {
-    return $getChildOutlines(outlineItem)
-  }
-  return [];
-}
