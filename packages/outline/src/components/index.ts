@@ -6,3 +6,7 @@ export {
 export {
   default as OutlineBulletIconPlugin
 } from './OutlineBulletIconPlugin.vue'
+
+export {
+  default as OutlineCheckPlugin
+} from './OutlineCheckPlugin.vue'

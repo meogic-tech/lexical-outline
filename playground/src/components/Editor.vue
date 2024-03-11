@@ -27,7 +27,8 @@ import {
   $createOutlineItemNode,
   BulletIconNode,
   $createBulletIconNode,
-  $createOutlineItemContentNode, OutlineItemContentNode
+  $createOutlineItemContentNode, OutlineItemContentNode,
+  OutlineCheckPlugin
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 
@@ -192,6 +193,7 @@ onUnmounted(() => {
         <LexicalHashtagPlugin />
         <OutlineViewPlugin />
         <OutlineBulletIconPlugin />
+        <OutlineCheckPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>
     </div>

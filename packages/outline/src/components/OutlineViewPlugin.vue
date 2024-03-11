@@ -227,13 +227,11 @@ onMounted(() => {
         return false
       }
       const node = nodes[0]
-      console.log("node", node);
       const outlineItemNode = $getParentOutlineItem(node)
       if (!outlineItemNode) {
         return false
       }
       const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
-      console.log("siblingsOutlineItem", siblingsOutlineItem);
       const outlineNode = $getParentOutline(node)
       if (!outlineNode) {
         console.warn("cannot find parent outline by node", node)
