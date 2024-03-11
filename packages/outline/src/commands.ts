@@ -1,3 +1,6 @@
 import {createCommand} from "lexical";
 
-export const COLLAPSE_OUTLINE_COMMAND = createCommand<boolean>('COLLAPSE_OUTLINE_COMMAND')
+export const COLLAPSE_OUTLINE_COMMAND = createCommand<{
+  outlineItemKey: string
+  collapsed: boolean
+}>('COLLAPSE_OUTLINE_COMMAND')

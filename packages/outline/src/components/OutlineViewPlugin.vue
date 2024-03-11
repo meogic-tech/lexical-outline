@@ -45,7 +45,10 @@ function indent(): boolean {
         previousOutlineItemNode.getOutlineItemContentNode()?.append(outlineNode)
       }
       outlineNode.append(outlineItemNode)
-      editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, false)
+      editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
+        outlineItemKey: previousOutlineItemNode.getKey(),
+        collapsed: false
+      })
       return true
     }
   }
@@ -127,8 +130,10 @@ const onClick = (event: MouseEvent) => {
           }
           const outlineItem = $getParentOutlineItem(node)
           if ($isOutlineItemNode(outlineItem)) {
-            outlineItem.select()
-            editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, !outlineItem.getCollapse())
+            editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
+              outlineItemKey: outlineItem.getKey(),
+              collapsed: !outlineItem.getCollapsed()
+            })
           }
         })
       }
@@ -139,25 +144,18 @@ const onClick = (event: MouseEvent) => {
 onMounted(() => {
   editor.getRootElement()!.addEventListener('click', onClick)
   unregister = mergeRegister(
-    editor.registerCommand(COLLAPSE_OUTLINE_COMMAND, (collapse: boolean) => {
+    editor.registerCommand(COLLAPSE_OUTLINE_COMMAND, (payload: { outlineItemKey: string, collapsed: boolean }, editor) => {
       const selection = $getSelection()
       if (!$isRangeSelection(selection)) {
         console.warn('not range selection')
         return false
       }
-      const nodes = selection.getNodes()
-      for (let node of nodes) {
-        const outlineNode = $getParentOutline(node)
-        if (!$isOutlineNode(outlineNode)) {
-          continue;
-        }
-        const outlineItemNode = $getParentOutlineItem(outlineNode)
-        if (!$isOutlineItemNode(outlineItemNode)) {
-          continue;
-        }
-        outlineItemNode.setCollapsed(collapse)
-        outlineItemNode.getChildOutlineNode()?.setDisplay(!collapse)
+      const outlineItemNode = $getNodeByKey(payload.outlineItemKey)
+      if (!$isOutlineItemNode(outlineItemNode)) {
+        return false;
       }
+      outlineItemNode.setCollapsed(payload.collapsed)
+      outlineItemNode.getChildOutlineNode()?.setDisplay(!payload.collapsed)
       return false
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(INSERT_PARAGRAPH_COMMAND, (payload, editor) => {
@@ -194,7 +192,7 @@ onMounted(() => {
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))
       const childOutline = parentOutlineItemNode.getChildOutlineNode()
-      if (childOutline && !parentOutlineItemNode.getCollapse()) {
+      if (childOutline && !parentOutlineItemNode.getCollapsed()) {
         childOutline.splice(0, 0, [outlineItemNode])
       } else {
         parentOutlineItemNode.insertAfter(outlineItemNode)

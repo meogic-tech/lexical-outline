@@ -50,7 +50,7 @@ export class OutlineItemNode extends ElementNode {
     return this
   }
 
-  getCollapse(): boolean {
+  getCollapsed(): boolean {
     return this.getLatest().__collapsed
   }
 
@@ -95,7 +95,7 @@ export class OutlineItemNode extends ElementNode {
     return {
       ...super.exportJSON(),
       id: this.getId(),
-      collapsed: this.getCollapse(),
+      collapsed: this.getCollapsed(),
     };
   }
 
