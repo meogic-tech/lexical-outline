@@ -77,7 +77,6 @@ function $checkOutlineItemContentNode(node: OutlineItemContentNode) : boolean {
     return false
   }
   const children = node.getChildren()
-  console.warn("$checkOutlineItemContentNode children", children);
   if (children.length === 0 || children.length > 2) {
     console.warn('outlineItemContent should have at least one child and at most two children')
     return false

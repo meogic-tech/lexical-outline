@@ -157,21 +157,23 @@ onMounted(() => {
         }
         outlineItemNode.setCollapsed(collapse)
         outlineItemNode.getChildOutlineNode()?.setDisplay(!collapse)
-        // $getChildOutlines(outlineItemNode).forEach(outline => {
-        //   outline.setDisplay(!collapse)
-        // })
       }
-
       return false
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(INSERT_PARAGRAPH_COMMAND, (payload, editor) => {
       const selection = $getSelection()
       if (!$isRangeSelection(selection)) {
+        console.warn('not range selection when insert paragraph')
         return false
       }
       // only append
       const anchor = selection.anchor.getNode()
       const newParagraphNode = $createParagraphNode()
+      const parentOutlineItemNode = $getParentOutlineItem(anchor)
+      if (parentOutlineItemNode === null) {
+        console.warn('cannot find parent outline item node', anchor)
+        return false
+      }
       if ($isTextNode(anchor)) {
         const anchorOffset = selection.anchor.offset
         let nodesToMove: LexicalNode[] = [];
@@ -186,11 +188,6 @@ onMounted(() => {
         for (let i = nodesToMove.length - 1; i >= 0; i--) {
           newParagraphNode.append(nodesToMove[i]);
         }
-      }
-
-      const parentOutlineItemNode = $getParentOutlineItem(anchor)
-      if (parentOutlineItemNode === null) {
-        return false
       }
       const outlineItemNode = $createOutlineItemNode('id:2', false)
       outlineItemNode
