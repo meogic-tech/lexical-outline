@@ -5,7 +5,7 @@ import {
   $createParagraphNode, $getNodeByKey,
   $getSelection, $isElementNode,
   $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
-  COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_LOW, ElementNode,
   INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode,
 } from "lexical";
@@ -14,6 +14,7 @@ import {$createBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 import {
+  $getOffsetInParent,
   $getParentOutline, $getParentOutlineItem,
 } from "@/table-util";
 import {$createOutlineItemContentNode} from "@/nodes";
@@ -21,8 +22,12 @@ import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 
 
 const editor = useEditor()
-
+const props = defineProps<{
+  $createParagraphNode: typeof $createParagraphNode | undefined
+}>()
 let unregister: () => void
+
+const internal$CreateParagraphNode = props.$createParagraphNode ?? $createParagraphNode
 
 function indent(): boolean {
   const selection = $getSelection()
@@ -166,7 +171,7 @@ onMounted(() => {
       }
       // only append
       const anchor = selection.anchor.getNode()
-      const newParagraphNode = $createParagraphNode()
+      const newParagraphNode = internal$CreateParagraphNode()
       const parentOutlineItemNode = $getParentOutlineItem(anchor)
       if (parentOutlineItemNode === null) {
         console.warn('cannot find parent outline item node', anchor)
@@ -212,7 +217,6 @@ onMounted(() => {
     //   return false
     // }, COMMAND_PRIORITY_HIGH),
     editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
-      console.log("KEY_BACKSPACE_COMMAND event", event);
       const selection = $getSelection()
       if (!$isRangeSelection(selection)) {
         return false
@@ -245,7 +249,11 @@ onMounted(() => {
         }
         return false
       }
-      if(selection.anchor.offset === 0) {
+      let offset = selection.anchor.offset
+      if ($isTextNode(node)) {
+        offset = $getOffsetInParent(node, selection.anchor.offset)
+      }
+      if(offset === 0) {
         // 选中上一个
         const index = siblingsOutlineItem.indexOf(outlineItemNode)
         if (index === 0) {
@@ -277,29 +285,16 @@ onMounted(() => {
           return false
         }
         const outlineItemContentNode = previousOutlineItemNode.getOutlineItemContentNode()
-        outlineItemContentNode?.getChildAtIndex(0)?.selectEnd()
+        const targetContent = outlineItemContentNode?.getChildAtIndex(0) as ElementNode | null | undefined
+        targetContent?.selectEnd()
+        const firstContent = outlineItemNode.getOutlineItemContentNode()?.getChildAtIndex(0) as ElementNode | null | undefined
+        if (firstContent) {
+          targetContent?.append(...firstContent.getChildren())
+        }
         outlineItemNode.remove()
         event.preventDefault()
         return true
       }
-
-      // const nodes = selection.getNodes()
-      // if (nodes.length === 1) {
-      //   const firstNode = nodes[0]
-      //   console.log("firstNode", firstNode);
-      //   const parentOutlineItemNode = $getParentOutlineItem(firstNode)
-      //   if (!parentOutlineItemNode) {
-      //     return false
-      //   }
-      //   const outlineNodes = $getChildOutlines(parentOutlineItemNode)
-      //   console.log("outlineNodes", outlineNodes);
-      //   console.log("selection.anchor.offset", selection.anchor.offset);
-      //
-      //   if (outlineNodes.length > 0 && selection.anchor.offset === 0){
-      //     console.log("return true")
-      //     return true
-      //   }
-      // }
       return false
     }, COMMAND_PRIORITY_HIGH),
   )

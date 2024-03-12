@@ -22,6 +22,20 @@ export function $getParentOutlineItem(node: LexicalNode): OutlineItemNode | null
   return $getParentOutlineItem(parent);
 }
 
+export function $getOffsetInParent(node: LexicalNode, currentOffset: number): number {
+  const parent = node.getParent();
+  if (parent === null || $isRootNode(parent)) return currentOffset;
+  let result = 0
+  for (let child of parent.getChildren()) {
+    if (child === node) {
+        return result + currentOffset;
+    }
+    result += child.getTextContentSize();
+  }
+  return result;
+}
+
+
 /**
  * (1) outline
  *     ├ (2) outline-item
