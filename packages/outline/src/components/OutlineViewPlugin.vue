@@ -302,7 +302,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   unregister()
-  editor.getRootElement().removeEventListener('click', onClick)
+  editor.getRootElement()?.removeEventListener('click', onClick)
 })
 </script>
 

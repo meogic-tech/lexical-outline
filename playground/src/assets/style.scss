@@ -801,11 +801,11 @@ $spotSize: 6px;
 .editor-outline-item-spot::before{
   content: '';
   position: absolute;
-  top: ($spotContainerSize - $spotSize) / 2;
-  left: ($spotContainerSize - $spotSize) / 2;
+  top:  calc(($spotContainerSize - $spotSize) / 2);
+  left:  calc(($spotContainerSize - $spotSize) / 2);
   width: $spotSize;
   height: $spotSize;
-  border-radius: $spotSize / 2;
+  border-radius: calc($spotSize / 2);
   background-color: #CCC;
 }
 

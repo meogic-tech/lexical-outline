@@ -60,12 +60,6 @@ export class BulletIconNode extends ElementNode {
     return $createBulletIconNode();
   }
 
-  exportJSON(): SerializedBulletIconNode {
-    return {
-      ...super.exportJSON(),
-    };
-  }
-
   isToken(): boolean {
     return true;
   }
