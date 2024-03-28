@@ -2,6 +2,7 @@ import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, Serializ
 type NodeId = string
 export type SerializedOutlineItemContentNode = Spread<
   {
+    type: 'outline-item-content'
   },
   SerializedElementNode
 >;
@@ -37,7 +38,12 @@ export class OutlineItemContentNode extends ElementNode {
   exportJSON(): SerializedOutlineItemContentNode {
     return {
       ...super.exportJSON(),
+      type: 'outline-item-content',
     };
+  }
+
+  isShadowRoot(): boolean {
+    return true
   }
 }
 

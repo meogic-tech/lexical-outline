@@ -6,6 +6,7 @@ export type SerializedOutlineItemNode = Spread<
   {
     id: NodeId
     collapsed: boolean
+    type: 'outline-item'
   },
   SerializedElementNode
 >;
@@ -96,6 +97,7 @@ export class OutlineItemNode extends ElementNode {
       ...super.exportJSON(),
       id: this.getId(),
       collapsed: this.getCollapsed(),
+      type: 'outline-item',
     };
   }
 

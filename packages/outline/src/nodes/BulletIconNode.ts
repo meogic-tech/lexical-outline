@@ -2,7 +2,7 @@ import {
   EditorConfig, ElementNode,
   LexicalEditor,
   LexicalNode,
-  NodeKey,
+  NodeKey, SerializedElementNode,
   SerializedTextNode,
   Spread,
   TextNode
@@ -11,8 +11,9 @@ import {
 
 export type SerializedBulletIconNode = Spread<
   {
+    type: 'bullet-icon'
   },
-  SerializedTextNode
+  SerializedElementNode
 >;
 
 export class BulletIconNode extends ElementNode {
@@ -58,6 +59,13 @@ export class BulletIconNode extends ElementNode {
 
   static importJSON(serializedNode: SerializedBulletIconNode): BulletIconNode {
     return $createBulletIconNode();
+  }
+
+  exportJSON(): SerializedBulletIconNode {
+    return {
+      ...super.exportJSON(),
+      type: 'bullet-icon',
+    };
   }
 
   isToken(): boolean {

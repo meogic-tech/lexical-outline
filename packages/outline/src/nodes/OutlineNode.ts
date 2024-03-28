@@ -5,6 +5,7 @@ type NodeId = string
 export type SerializedOutlineNode = Spread<
   {
     display: boolean
+    type: 'outline'
   },
   SerializedElementNode
 >;
@@ -81,8 +82,9 @@ export class OutlineNode extends ElementNode {
 
   exportJSON(): SerializedOutlineNode {
     return {
-      display: this._display,
       ...super.exportJSON(),
+      display: this._display,
+      type: 'outline',
     };
   }
 
