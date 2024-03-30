@@ -163,6 +163,10 @@ function onError(error: Error) {
 
 onUnmounted(() => {
 })
+let id = 10
+function getNewOutlineItemId() {
+  return (id ++).toString()
+}
 </script>
 
 <template>
@@ -191,7 +195,7 @@ onUnmounted(() => {
         <LexicalListPlugin />
         <LexicalLinkPlugin />
         <LexicalHashtagPlugin />
-        <OutlineViewPlugin />
+        <OutlineViewPlugin :getNewOutlineItemId="getNewOutlineItemId"/>
         <OutlineBulletIconPlugin />
         <OutlineCheckPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>

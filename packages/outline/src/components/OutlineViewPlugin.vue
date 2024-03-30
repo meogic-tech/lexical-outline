@@ -11,7 +11,7 @@ import {
 } from "lexical";
 import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
-import {$createOutlineItemNode, $isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
+import {$createOutlineItemNode, $isOutlineItemNode, NodeId, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 import {
   $getOffsetInParent,
@@ -23,11 +23,12 @@ import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 
 const editor = useEditor()
 const props = defineProps<{
-  $createParagraphNode: typeof $createParagraphNode | undefined
+  createParagraphNode: typeof $createParagraphNode | undefined
+  getNewOutlineItemId: () => NodeId
 }>()
 let unregister: () => void
 
-const internal$CreateParagraphNode = props.$createParagraphNode ?? $createParagraphNode
+const internal$CreateParagraphNode = props.createParagraphNode ?? $createParagraphNode
 
 function indent(): boolean {
   const selection = $getSelection()
@@ -192,7 +193,7 @@ onMounted(() => {
           newParagraphNode.append(nodesToMove[i]);
         }
       }
-      const outlineItemNode = $createOutlineItemNode('id:2', false)
+      const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
       outlineItemNode
           .append($createBulletIconNode())
           .append($createOutlineItemContentNode().append(newParagraphNode))

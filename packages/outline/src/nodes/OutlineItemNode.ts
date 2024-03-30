@@ -1,7 +1,7 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
 import {$isOutlineItemContentNode, OutlineItemContentNode} from "@/nodes/OutlineItemContentNode";
 import {$isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
-type NodeId = string
+export type NodeId = string
 export type SerializedOutlineItemNode = Spread<
   {
     id: NodeId
