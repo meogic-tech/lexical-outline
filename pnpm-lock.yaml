@@ -50,14 +50,16 @@ importers:
         version: 5.2.2
 
   packages/outline:
-    dependencies:
-      '@lexical/utils':
-        specifier: ^0.12.6
-        version: 0.12.6(lexical@0.12.6)
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^0.37.0
         version: 0.37.0(eslint@8.36.0)(jest@29.7.0)(typescript@4.9.5)
+      '@lexical/code':
+        specifier: ^0.12.6
+        version: 0.12.6(lexical@0.12.6)
+      '@lexical/utils':
+        specifier: ^0.12.6
+        version: 0.12.6(lexical@0.12.6)
       '@types/jest':
         specifier: ^29.5.4
         version: 29.5.4
@@ -2525,7 +2527,6 @@ packages:
       '@lexical/utils': 0.12.6(lexical@0.12.6)
       lexical: 0.12.6
       prismjs: 1.29.0
-    dev: false
 
   /@lexical/dragon@0.12.6(lexical@0.12.6):
     resolution: {integrity: sha512-VKbXzdtF6qizwESx7Zag/VGiYKMAc+xpJF7tcwv5SH8I4bnseoozafzxRG6AE7J9nzGwO74ypKqPmmpP9e20BA==}
@@ -2579,7 +2580,6 @@ packages:
     dependencies:
       '@lexical/utils': 0.12.6(lexical@0.12.6)
       lexical: 0.12.6
-    dev: false
 
   /@lexical/mark@0.12.6(lexical@0.12.6):
     resolution: {integrity: sha512-utk6kgTSTuzmM0+B4imGTGwC4gQRCQ4hHEZTVbkIDbONvjbo9g6xfbTO9g6Qxs2h7Zt0Q2eDA7RG4nwC3vN1KQ==}
@@ -2657,7 +2657,6 @@ packages:
       lexical: 0.12.6
     dependencies:
       lexical: 0.12.6
-    dev: false
 
   /@lexical/table@0.12.6(lexical@0.12.6):
     resolution: {integrity: sha512-rUh9/fN831T6UpNiPuzx0x6HNi/eQ7W5AQrVBwwzEwkbwAqnE0n28DP924AUbX72UsQNHtywgmDApMoEV7W2iQ==}
@@ -2666,7 +2665,6 @@ packages:
     dependencies:
       '@lexical/utils': 0.12.6(lexical@0.12.6)
       lexical: 0.12.6
-    dev: false
 
   /@lexical/text@0.12.6(lexical@0.12.6):
     resolution: {integrity: sha512-WfqfH9gvPAx9Hi9wrJDWECdvt6turPQXImCRI657LVfsP2hHh4eHpcSnd3YYH313pv98HPWmeMstBbEieYwTpQ==}
@@ -2685,7 +2683,6 @@ packages:
       '@lexical/selection': 0.12.6(lexical@0.12.6)
       '@lexical/table': 0.12.6(lexical@0.12.6)
       lexical: 0.12.6
-    dev: false
 
   /@lexical/yjs@0.12.6(lexical@0.12.6)(yjs@13.6.8):
     resolution: {integrity: sha512-I/Yf/Qm8/ydU983kWpFBlDFNFQXLYur5uaAimTSBcJuqHmy3cv1xM7Xrq4BtM+0orKgWJt8vR8cLVIU9sAmzfw==}
@@ -8424,7 +8421,6 @@ packages:
 
   /lexical@0.12.6:
     resolution: {integrity: sha512-Nlfjc+k9cIWpOMv7XufF0Mv09TAXSemNAuAqFLaOwTcN+RvhvYTDtVLSp9D9r+5I097fYs1Vf/UYwH2xEpkFfQ==}
-    dev: false
 
   /lib0@0.2.88:
     resolution: {integrity: sha512-KyroiEvCeZcZEMx5Ys+b4u4eEBbA1ch7XUaBhYpwa/nPMrzTjUhI4RfcytmQfYoTBPcdyx+FX6WFNIoNuJzJfQ==}
@@ -9843,7 +9839,6 @@ packages:
   /prismjs@1.29.0:
     resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}
     engines: {node: '>=6'}
-    dev: false
 
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}

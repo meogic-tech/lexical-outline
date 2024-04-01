@@ -10,3 +10,7 @@ export {
 export {
   default as OutlineCheckPlugin
 } from './OutlineCheckPlugin.vue'
+
+export {
+  default as LexicalCodeHighlightPlugin
+} from './LexicalCodeHighlightPlugin.vue'

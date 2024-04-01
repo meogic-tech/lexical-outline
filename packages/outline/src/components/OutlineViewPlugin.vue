@@ -7,7 +7,7 @@ import {
   $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW, ElementNode,
   INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DOWN_COMMAND,
-  KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode,
+  KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
 } from "lexical";
 import { mergeRegister } from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
@@ -19,6 +19,7 @@ import {
 } from "@/table-util";
 import {$createOutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
+import {$isCodeHighlightNode, $isCodeNode} from "@lexical/code";
 
 
 const editor = useEditor()
@@ -147,6 +148,41 @@ const onClick = (event: MouseEvent) => {
   }
 }
 
+function $addNewOutlineItemNode(selection: RangeSelection, anchor:  ElementNode | TextNode) {
+  const newParagraphNode = internal$CreateParagraphNode()
+  const parentOutlineItemNode = $getParentOutlineItem(anchor)
+  if (parentOutlineItemNode === null) {
+    console.warn('cannot find parent outline item node', anchor)
+    return false
+  }
+  if ($isTextNode(anchor)) {
+    const anchorOffset = selection.anchor.offset
+    let nodesToMove: LexicalNode[] = [];
+    nodesToMove = anchor.getNextSiblings().reverse();
+    const textContentLength = anchor.getTextContentSize();
+    if (anchorOffset === 0) {
+      nodesToMove.push(anchor);
+    } else if (anchorOffset !== textContentLength) {
+      const [, splitNode] = anchor.splitText(anchorOffset);
+      nodesToMove.push(splitNode);
+    }
+    for (let i = nodesToMove.length - 1; i >= 0; i--) {
+      newParagraphNode.append(nodesToMove[i]);
+    }
+  }
+  const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
+  outlineItemNode
+      .append($createBulletIconNode())
+      .append($createOutlineItemContentNode().append(newParagraphNode))
+  const childOutline = parentOutlineItemNode.getChildOutlineNode()
+  if (childOutline && !parentOutlineItemNode.getCollapsed()) {
+    childOutline.splice(0, 0, [outlineItemNode])
+  } else {
+    parentOutlineItemNode.insertAfter(outlineItemNode)
+  }
+  newParagraphNode.select(0, 0)
+}
+
 onMounted(() => {
   editor.getRootElement()!.addEventListener('click', onClick)
   unregister = mergeRegister(
@@ -170,42 +206,58 @@ onMounted(() => {
         console.warn('not range selection when insert paragraph')
         return false
       }
-      // only append
       const anchor = selection.anchor.getNode()
-      const newParagraphNode = internal$CreateParagraphNode()
-      const parentOutlineItemNode = $getParentOutlineItem(anchor)
-      if (parentOutlineItemNode === null) {
-        console.warn('cannot find parent outline item node', anchor)
-        return false
-      }
-      if ($isTextNode(anchor)) {
-        const anchorOffset = selection.anchor.offset
-        let nodesToMove: LexicalNode[] = [];
-        nodesToMove = anchor.getNextSiblings().reverse();
-        const textContentLength = anchor.getTextContentSize();
-        if (anchorOffset === 0) {
-          nodesToMove.push(anchor);
-        } else if (anchorOffset !== textContentLength) {
-          const [, splitNode] = anchor.splitText(anchorOffset);
-          nodesToMove.push(splitNode);
+      //region 处理和代码块相关的换行
+      if ($isCodeNode(anchor)) {
+        /**
+         * 当前选中了code节点，则说明当前其实光标显示在新的一行上
+         */
+        const children = anchor.getChildren()
+        const childrenLength = children.length
+        if (childrenLength >= 2
+            && children[childrenLength - 1].getTextContent() === '\n'
+            && children[childrenLength - 2].getTextContent() === '\n'
+            && selection.isCollapsed()
+            && selection.anchor.key === anchor.getKey()
+            && selection.anchor.offset === childrenLength) {
+          /**
+           * 此时的代码是
+           * function A{
+           *
+           *
+           * ^ cursor
+           * 此时如果再按回车就会触发添加新的outline item node
+           */
+          children[childrenLength - 1].remove()
+          children[childrenLength - 2].remove()
+          $addNewOutlineItemNode(selection, anchor)
+          return true
         }
-        for (let i = nodesToMove.length - 1; i >= 0; i--) {
-          newParagraphNode.append(nodesToMove[i]);
-        }
+        /**
+         * 此时的代码是
+         * function A{
+         *
+         * ^ cursor
+         * 执行下面的代码才会运行我继续新增一行以添加}
+         */
+        selection.insertParagraph()
+        return true
       }
-      const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
-      outlineItemNode
-          .append($createBulletIconNode())
-          .append($createOutlineItemContentNode().append(newParagraphNode))
-      const childOutline = parentOutlineItemNode.getChildOutlineNode()
-      if (childOutline && !parentOutlineItemNode.getCollapsed()) {
-        childOutline.splice(0, 0, [outlineItemNode])
-      } else {
-        parentOutlineItemNode.insertAfter(outlineItemNode)
+      const parent = anchor.getParent()
+      if ($isCodeNode(parent)) {
+        /**
+         * 这里时最普通的情况，在高亮代码中进行了回车，然后应该触发拆分高亮代码节点
+         */
+        selection.insertParagraph()
+        return true
       }
-      newParagraphNode.select(0, 0)
+      //endregion
+      /**
+       * 处理和代码块无关的情况
+       */
+      $addNewOutlineItemNode(selection, anchor)
       return true
-    }, COMMAND_PRIORITY_LOW),
+    }, COMMAND_PRIORITY_HIGH),
     editor.registerCommand(KEY_TAB_COMMAND, (event: KeyboardEvent, editor) => {
       event.preventDefault()
       return event.shiftKey ? outdent() : indent()

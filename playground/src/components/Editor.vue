@@ -28,7 +28,8 @@ import {
   BulletIconNode,
   $createBulletIconNode,
   $createOutlineItemContentNode, OutlineItemContentNode,
-  OutlineCheckPlugin
+  OutlineCheckPlugin,
+  LexicalCodeHighlightPlugin
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 
@@ -198,6 +199,7 @@ function getNewOutlineItemId() {
         <OutlineViewPlugin :getNewOutlineItemId="getNewOutlineItemId"/>
         <OutlineBulletIconPlugin />
         <OutlineCheckPlugin />
+        <LexicalCodeHighlightPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>
     </div>
