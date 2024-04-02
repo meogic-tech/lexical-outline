@@ -17,7 +17,7 @@ import {
   $getOffsetInParent,
   $getParentOutline, $getParentOutlineItem,
 } from "@/table-util";
-import {$createOutlineItemContentNode} from "@/nodes";
+import {$createOutlineItemContentNode, OutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 import {$isCodeHighlightNode, $isCodeNode} from "@lexical/code";
 
@@ -26,10 +26,12 @@ const editor = useEditor()
 const props = defineProps<{
   createParagraphNode: typeof $createParagraphNode | undefined
   getNewOutlineItemId: () => NodeId
+  isCodeNode: (node: ElementNode | TextNode | null) => boolean
 }>()
 let unregister: () => void
 
 const internal$CreateParagraphNode = props.createParagraphNode ?? $createParagraphNode
+const internal$isCodeNode = props.isCodeNode ?? $isCodeNode
 
 function indent(): boolean {
   const selection = $getSelection()
@@ -183,6 +185,25 @@ function $addNewOutlineItemNode(selection: RangeSelection, anchor:  ElementNode 
   newParagraphNode.select(0, 0)
 }
 
+function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): ElementNode | null {
+  const outlineItemContentNode = outlineItemNode.getOutlineItemContentNode()
+  if (!outlineItemContentNode) {
+    return null
+  }
+  const content = outlineItemContentNode.getFirstChild()
+  if (outlineItemContentNode.getChildrenSize() === 1) {
+    return content as ElementNode | null
+  }
+  const childOutlineNode = outlineItemNode.getChildOutlineNode()
+  if (childOutlineNode)  {
+    const lastOutlineItemNode = childOutlineNode.getLastChild()
+    if ($isOutlineItemNode(lastOutlineItemNode)) {
+      return $getTheLastContentInOutlineItem(lastOutlineItemNode)
+    }
+  }
+  return null
+}
+
 onMounted(() => {
   editor.getRootElement()!.addEventListener('click', onClick)
   unregister = mergeRegister(
@@ -208,11 +229,11 @@ onMounted(() => {
       }
       const anchor = selection.anchor.getNode()
       //region 处理和代码块相关的换行
-      if ($isCodeNode(anchor)) {
+      if (internal$isCodeNode(anchor)) {
         /**
          * 当前选中了code节点，则说明当前其实光标显示在新的一行上
          */
-        const children = anchor.getChildren()
+        const children = (anchor as ElementNode).getChildren()
         const childrenLength = children.length
         if (childrenLength >= 2
             && children[childrenLength - 1].getTextContent() === '\n'
@@ -244,7 +265,7 @@ onMounted(() => {
         return true
       }
       const parent = anchor.getParent()
-      if ($isCodeNode(parent)) {
+      if (internal$isCodeNode(parent)) {
         /**
          * 这里时最普通的情况，在高亮代码中进行了回车，然后应该触发拆分高亮代码节点
          */
@@ -300,11 +321,16 @@ onMounted(() => {
           event.preventDefault()
           return true
         }
-        return false
+        // 原本这里return false似乎可以有默认的操作
       }
       let offset = selection.anchor.offset
       if ($isTextNode(node)) {
         offset = $getOffsetInParent(node, selection.anchor.offset)
+      }
+      if (offset === 0 && outlineItemNode.getChildOutlineNode()) {
+        console.debug("cannot backspace because it has child outline items");
+        event.preventDefault()
+        return true
       }
       if(offset === 0) {
         // 选中上一个
@@ -330,20 +356,48 @@ onMounted(() => {
             event.preventDefault()
             return true
           }
-          console.debug("do not backspace because it will be right default behavior");
-          return false
         }
+        let targetContent: ElementNode | null = null
         const previousOutlineItemNode = siblingsOutlineItem[index - 1]
-        if (!previousOutlineItemNode) {
-          return false
+        if (previousOutlineItemNode) {
+          /**
+           * 因为是要聚焦上个outlineItem，而它又是可能有子节点的，所以要调用这个来递归获取
+           * - outline
+           *   - outline-item
+           *     - bullet-icon
+           *     - outline-item-content
+           *       - paragraph
+           *       - outline
+           *         - outline-item
+           *           - bullet-icon
+           *           - outline-item-content
+           *             - paragraph
+           *             - outline
+           *               - outline-item
+           *                 - bullet-icon
+           *                 - outline-item-content
+           *                   - paragraph                <-- need to select here
+           *         - outline-item
+           *           - bullet-icon
+           *           - outline-item-content
+           *             - paragraph                      <-- when backspace as first of this paragraph
+           */
+          targetContent = $getTheLastContentInOutlineItem(previousOutlineItemNode)
+        } else {
+          const parentOutlineItemNode = $getParentOutlineItem(outlineNode)
+          if (parentOutlineItemNode) {
+            /**
+             * 因为确定了要聚焦的父层级的outlineItem，所以直接获取它的第一个content即可
+             */
+            targetContent = parentOutlineItemNode.getOutlineItemContentNode()?.getChildAtIndex(0) as ElementNode | null
+          }
         }
-        const outlineItemContentNode = previousOutlineItemNode.getOutlineItemContentNode()
-        const targetContent = outlineItemContentNode?.getChildAtIndex(0) as ElementNode | null | undefined
         targetContent?.selectEnd()
         const firstContent = outlineItemNode.getOutlineItemContentNode()?.getChildAtIndex(0) as ElementNode | null | undefined
         if (firstContent) {
           targetContent?.append(...firstContent.getChildren())
         }
+        outlineNode.getChildrenSize() === 1 && outlineNode.remove()
         outlineItemNode.remove()
         event.preventDefault()
         return true
