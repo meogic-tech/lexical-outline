@@ -42,6 +42,16 @@ export class OutlineItemContentNode extends ElementNode {
     };
   }
 
+  /**
+   * 获取用于显示的文本节点
+   */
+  getTextElementNode(): ElementNode | null {
+    return this.getChildAtIndex(1) as ElementNode | null
+  }
+
+  /**
+   * 加上这个才能成功触发markdown的快捷方式
+   */
   isShadowRoot(): boolean {
     return true
   }

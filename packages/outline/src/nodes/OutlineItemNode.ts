@@ -111,9 +111,7 @@ export class OutlineItemNode extends ElementNode {
   }
 
   getChildOutlineNode(): OutlineNode | null {
-    const outlineContentNode = this.getOutlineItemContentNode()
-    if (outlineContentNode === null) return null
-    const children = outlineContentNode.getChildren()
+    const children = this.getChildren()
     for (const child of children) {
       if ($isOutlineNode(child)) {
         return child

@@ -43,27 +43,29 @@ function preOutlineText() {
   if (root.getFirstChild() === null) {
     const outline2 = $createOutlineNode(true)
     const outlineItemNode2 = $createOutlineItemNode('id:2', false)
-        .append($createBulletIconNode())
-        .append($createOutlineItemContentNode().append($createParagraphNode().append($createTextNode('Hello!'))))
+        .append($createOutlineItemContentNode()
+            .append($createBulletIconNode())
+            .append($createParagraphNode().append($createTextNode('Hello!'))))
     const outlineItemNode3 = $createOutlineItemNode('id:3', false)
-        .append($createBulletIconNode())
-        .append($createOutlineItemContentNode().append($createParagraphNode().append($createTextNode('World!'))))
+        .append($createOutlineItemContentNode()
+            .append($createBulletIconNode())
+            .append($createParagraphNode().append($createTextNode('World!'))))
     outline2.append(outlineItemNode2).append(outlineItemNode3)
 
     const outline = $createOutlineNode(true)
     const outlineItemNode = $createOutlineItemNode('id:1', false)
     outline
         .append(outlineItemNode
-            .append($createBulletIconNode())
             .append($createOutlineItemContentNode()
+                .append($createBulletIconNode())
                 .append($createParagraphNode()
                     .append($createTextNode('This is a '))
                     .append($createTextNode('playground').setFormat("bold"))
                     .append($createTextNode(' for the outline plugin.'))
                 )
                 // .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground')))
-                .append(outline2)
             )
+            .append(outline2)
         )
 
 
@@ -198,7 +200,7 @@ function getNewOutlineItemId() {
         <LexicalHashtagPlugin />
         <OutlineViewPlugin :getNewOutlineItemId="getNewOutlineItemId"/>
         <OutlineBulletIconPlugin />
-        <OutlineCheckPlugin />
+<!--        <OutlineCheckPlugin />-->
         <LexicalCodeHighlightPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>

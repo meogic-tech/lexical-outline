@@ -51,7 +51,7 @@ function indent(): boolean {
       let outlineNode = previousOutlineItemNode.getChildOutlineNode()
       if (!outlineNode) {
         outlineNode = $createOutlineNode(true)
-        previousOutlineItemNode.getOutlineItemContentNode()?.append(outlineNode)
+        previousOutlineItemNode.append(outlineNode)
       }
       outlineNode.append(outlineItemNode)
       editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
@@ -174,8 +174,9 @@ function $addNewOutlineItemNode(selection: RangeSelection, anchor:  ElementNode 
   }
   const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
   outlineItemNode
-      .append($createBulletIconNode())
-      .append($createOutlineItemContentNode().append(newParagraphNode))
+      .append($createOutlineItemContentNode()
+          .append($createBulletIconNode())
+          .append(newParagraphNode))
   const childOutline = parentOutlineItemNode.getChildOutlineNode()
   if (childOutline && !parentOutlineItemNode.getCollapsed()) {
     childOutline.splice(0, 0, [outlineItemNode])
@@ -190,7 +191,11 @@ function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): Elem
   if (!outlineItemContentNode) {
     return null
   }
-  const content = outlineItemContentNode.getFirstChild()
+  /**
+   * 现在outlineItemContentNode下第一个是bullet icon node
+   * 第二个才是paragraph node之类的
+   */
+  const content = outlineItemContentNode.getLastChild()
   if (outlineItemContentNode.getChildrenSize() === 1) {
     return content as ElementNode | null
   }
@@ -337,15 +342,15 @@ onMounted(() => {
         const index = siblingsOutlineItem.indexOf(outlineItemNode)
         if (index === 0) {
           /**
-           * outline
-           * - outline-item
-           *  - bullet-icon
-           *  - outline-item-content
-           *    - paragraph
+           * - outline
+           *   - outline-item
+           *    - outline-item-content
+           *      - bullet-icon
+           *      - paragraph
            *    - outline
            *      - outline-item
-           *        - bullet-icon
            *        - outline-item-content
+           *          - bullet-icon
            *          - paragraph
            *          ^ cursor
            */
@@ -389,11 +394,12 @@ onMounted(() => {
             /**
              * 因为确定了要聚焦的父层级的outlineItem，所以直接获取它的第一个content即可
              */
-            targetContent = parentOutlineItemNode.getOutlineItemContentNode()?.getChildAtIndex(0) as ElementNode | null
+            // @ts-ignore
+            targetContent = parentOutlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
           }
         }
         targetContent?.selectEnd()
-        const firstContent = outlineItemNode.getOutlineItemContentNode()?.getChildAtIndex(0) as ElementNode | null | undefined
+        const firstContent = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
         if (firstContent) {
           targetContent?.append(...firstContent.getChildren())
         }

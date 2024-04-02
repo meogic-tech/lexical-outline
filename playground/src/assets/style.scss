@@ -773,9 +773,11 @@ i.justify-align {
   justify-content: center;
 }
 
+.editor-outline .editor-outline{
+  margin-left: 24px;
+}
+
 .editor-outline-item{
-  display: flex;
-  align-items: start;
   margin-bottom: 6px;
   max-height: 99999px;
   transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
@@ -783,7 +785,12 @@ i.justify-align {
 .editor-outline-item:has(.editor-heading-h1) {
   //margin-bottom: 12px;
 }
-.editor-outline-item-content>*:not(:first-child) {
+.editor-outline-item-content{
+  display: flex;
+  align-items: start;
+}
+
+.editor-outline-item>*:not(:first-child) {
   margin-top: 6px;
 }
 
@@ -809,7 +816,7 @@ $spotSize: 6px;
   background-color: #CCC;
 }
 
-.editor-outline-item>*:last-child {
+.editor-outline-item-content>*:last-child {
   flex: 1;
 }
 ::selection {
