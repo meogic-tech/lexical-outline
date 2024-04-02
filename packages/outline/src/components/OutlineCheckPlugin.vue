@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useEditor, useMounted} from "lexical-vue";
-import {$getRoot, $isElementNode} from "lexical";
+import {$getRoot, $getSelection, $isElementNode, $isRangeSelection, ElementNode} from "lexical";
 import {
   $isBulletIconNode,
   $isOutlineItemContentNode,
@@ -10,32 +10,55 @@ import {
   OutlineItemNode,
   OutlineNode
 } from "@/nodes";
+import {$getParentOutlineItem} from "@/table-util";
 
 /**
  * 用于检验outline的数据结构是否正确
  */
 const editor = useEditor()
 
-function $checkOutlineNode(outlineNode: OutlineNode) : boolean {
+/**
+ * 检查不通过的事件
+ * 事件checkError，第一个参数是relativeNode: OutlineNode | OutlineItemNode | OutlineItemContentNode | null
+ */
+const emit = defineEmits<{
+  (event: 'checkError', relativeNode: ElementNode | null): void;
+}>();
+
+interface CheckResult {
+  success: boolean
+  relativeNode: OutlineNode | OutlineItemNode | OutlineItemContentNode | null
+}
+
+function $checkOutlineNode(outlineNode: OutlineNode) : CheckResult {
   // outline的children至少有一个outlineItem，且全部只能是outlineItem
   const outlineChildren = outlineNode.getChildren()
   if (outlineChildren.length === 0) {
     console.warn('outline should have at least one outlineItem')
-    return false
+    return {
+      success: false,
+      relativeNode: outlineNode
+    }
   }
   for (const child of outlineChildren) {
     if (!$isOutlineItemNode(child)) {
       console.warn('outline children should be outlineItem')
-      return false
+      return {
+        success: false,
+        relativeNode: outlineNode
+      }
     }
   }
   for (const outlineChild of outlineChildren) {
     const result = $checkOutlineItemNode(outlineChild as OutlineItemNode)
-    if (!result) {
-      return false
+    if (!result.success) {
+      return result
     }
   }
-  return true
+  return {
+    success: true,
+    relativeNode: outlineNode
+  }
 }
 
 /**
@@ -44,56 +67,107 @@ function $checkOutlineNode(outlineNode: OutlineNode) : boolean {
  * 没有其他children
  * @param node
  */
-function $checkOutlineItemNode(node: OutlineItemNode) : boolean {
+function $checkOutlineItemNode(node: OutlineItemNode) : CheckResult {
   if (!$isOutlineItemNode(node)) {
     console.warn('node should be outlineItem')
-    return false
+    return {
+      success: false,
+      relativeNode: node
+    }
   }
   const children = node.getChildren()
-  if (children.length !== 2) {
-    console.warn('outlineItem should have two children')
-    return false
+  if (children.length === 0) {
+    console.warn('outlineItem should have outline item content node')
+    return {
+      success: false,
+      relativeNode: node
+    }
   }
-  const [bulletIconNode, outlineItemContentNode] = children
-  if (!$isBulletIconNode(bulletIconNode)) {
-    console.warn('first of children should be bullet-icon')
-    return false
+  if (children.length > 2) {
+    console.warn('outlineItem should only have two children')
+    return {
+      success: false,
+      relativeNode: node
+    }
   }
+  const [outlineItemContentNode, outlineNode] = children
   if (!$isOutlineItemContentNode(outlineItemContentNode)) {
-    console.warn('second of children should be outline-item-content')
-    return false
+    console.warn('first of children should be outline-item-content')
+    return {
+      success: false,
+      relativeNode: node
+    }
   }
-  return $checkOutlineItemContentNode(outlineItemContentNode)
+  const result = $checkOutlineItemContentNode(outlineItemContentNode)
+  if (!result.success) {
+    return result
+  }
+  if (outlineNode) {
+    if (!$isOutlineNode(outlineNode)) {
+      console.warn('second of children should be outline node')
+      return {
+        success: false,
+        relativeNode: node
+      }
+    }
+    const result = $checkOutlineNode(outlineNode as OutlineNode)
+    if (!result.success) {
+      return {
+        success: false,
+        relativeNode: node
+      }
+    }
+  }
+  return {
+    success: true,
+    relativeNode: node
+  }
 }
 
 /**
- * 第一个child是一个ElementNode
- * 可能有第二个child，如果有的话一定是outline
+ * 第一个child是一个bullet-icon
+ * 可能有第二个child，是一个ElementNode
  * @param node
  */
-function $checkOutlineItemContentNode(node: OutlineItemContentNode) : boolean {
+function $checkOutlineItemContentNode(node: OutlineItemContentNode) : CheckResult {
   if (!$isOutlineItemContentNode(node)) {
     console.warn('node should be outlineItemContent')
-    return false
+    return {
+      success: false,
+      relativeNode: node
+    }
   }
   const children = node.getChildren()
   if (children.length === 0 || children.length > 2) {
     console.warn('outlineItemContent should have at least one child and at most two children')
-    return false
-  }
-  const [firstChild, secondChild] = children
-  if (!$isElementNode(firstChild)) {
-    console.warn('first of children should be an element node')
-    return false
-  }
-  if (secondChild) {
-    if (!$isOutlineNode(secondChild)) {
-      console.warn('second of children should be an outline node')
-      return false
+    return {
+      success: false,
+      relativeNode: node
     }
-    return $checkOutlineNode(secondChild as OutlineNode)
   }
-  return true
+  const [bulletIconNode, elementNode] = children
+
+  if(!$isBulletIconNode(bulletIconNode)) {
+    console.warn('first of children should be a bullet-icon node')
+    return {
+      success: false,
+      relativeNode: node
+    }
+  }
+
+  if (elementNode) {
+    if (!$isElementNode(bulletIconNode)) {
+      console.warn('second of children should be an element node')
+      return {
+        success: false,
+        relativeNode: node
+      }
+    }
+  }
+  return {
+    success: true,
+    relativeNode: node
+  }
 }
 
 useMounted(() => {
@@ -114,11 +188,34 @@ useMounted(() => {
         check = false
         return
       }
-      check = $checkOutlineNode(outlineNode)
+      const result = $checkOutlineNode(outlineNode)
+      if (!result.success) {
+        check = false
+        emit('checkError', result.relativeNode)
+        return
+      }
     })
     if (!check) {
       editor.setEditorState(payload.prevEditorState, {
         tag: 'check-outline-node'
+      })
+      editor.getEditorState().read(() => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection)) {
+          return
+        }
+        const outlineItemNode = $getParentOutlineItem(selection.focus.getNode())
+        if (!outlineItemNode) {
+          return
+        }
+        const element = editor.getElementByKey(outlineItemNode.getKey())
+        if (!element) {
+          return
+        }
+        element.classList.add('error-shake')
+        setTimeout(() => {
+          element.classList.remove('error-shake')
+        }, 800)
       })
     }
   })

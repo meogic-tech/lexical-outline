@@ -839,3 +839,20 @@ $spotSize: 6px;
     border-radius: 9999px;
   }
 }
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  14%, 42%, 70%{
+    transform: translateX(-3px);
+  }
+  28%, 56%, 84%{
+    transform: translateX(3px);
+  }
+}
+
+.error-shake {
+  animation: shake 0.5s cubic-bezier(0.33,1,0.68,1);
+  animation-iteration-count: 1; /* 确保动画只播放一次 */
+}

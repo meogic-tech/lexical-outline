@@ -200,7 +200,7 @@ function getNewOutlineItemId() {
         <LexicalHashtagPlugin />
         <OutlineViewPlugin :getNewOutlineItemId="getNewOutlineItemId"/>
         <OutlineBulletIconPlugin />
-<!--        <OutlineCheckPlugin />-->
+        <OutlineCheckPlugin />
         <LexicalCodeHighlightPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>
