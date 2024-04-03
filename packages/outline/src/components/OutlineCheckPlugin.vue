@@ -10,7 +10,7 @@ import {
   OutlineItemNode,
   OutlineNode
 } from "@/nodes";
-import {$getParentOutlineItem} from "@/table-util";
+import {$getParentOutlineItem} from "@/outline-util";
 
 /**
  * 用于检验outline的数据结构是否正确
@@ -22,7 +22,7 @@ const editor = useEditor()
  * 事件checkError，第一个参数是relativeNode: OutlineNode | OutlineItemNode | OutlineItemContentNode | null
  */
 const emit = defineEmits<{
-  (event: 'checkError', relativeNode: ElementNode | null): void;
+  (event: 'checkError', relativeHTMLElement: HTMLElement | null): void;
 }>();
 
 interface CheckResult {
@@ -191,7 +191,6 @@ useMounted(() => {
       const result = $checkOutlineNode(outlineNode)
       if (!result.success) {
         check = false
-        emit('checkError', result.relativeNode)
         return
       }
     })
@@ -209,13 +208,7 @@ useMounted(() => {
           return
         }
         const element = editor.getElementByKey(outlineItemNode.getKey())
-        if (!element) {
-          return
-        }
-        element.classList.add('error-shake')
-        setTimeout(() => {
-          element.classList.remove('error-shake')
-        }, 800)
+        emit('checkError', element)
       })
     }
   })

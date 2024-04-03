@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
+import {$createParagraphNode, $createTextNode, $getRoot, ElementNode} from 'lexical'
 import {
   LexicalAutoFocusPlugin,
   LexicalComposer,
@@ -32,6 +32,7 @@ import {
   LexicalCodeHighlightPlugin
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
+import {CannotBackspaceErrorCodeType} from "lexical-outline/dist";
 
 let unregister: () => void
 
@@ -170,6 +171,40 @@ let id = 10
 function getNewOutlineItemId() {
   return (id ++).toString()
 }
+
+let checkErrorTimeout: number | null = null
+
+const onCheckError = (relativeHTMLElement: HTMLElement | null) => {
+  if (!relativeHTMLElement) {
+    return
+  }
+  if (relativeHTMLElement.classList.contains('error-shake')) {
+    relativeHTMLElement.classList.remove('error-shake')
+    checkErrorTimeout && clearTimeout(checkErrorTimeout)
+  }
+
+  relativeHTMLElement.classList.add('error-shake')
+  checkErrorTimeout = setTimeout(() => {
+    relativeHTMLElement.classList.remove('error-shake')
+  }, 800)
+}
+
+let cannotBackspaceErrorTimeout: number | null = null
+
+const onCannotBackspaceError = (relativeHTMLElement: HTMLElement | null, errorCode: CannotBackspaceErrorCodeType) => {
+  if (!relativeHTMLElement) {
+    return
+  }
+  if (relativeHTMLElement.classList.contains('error-shake')) {
+    relativeHTMLElement.classList.remove('error-shake')
+    cannotBackspaceErrorTimeout && clearTimeout(cannotBackspaceErrorTimeout)
+  }
+  relativeHTMLElement.classList.add('error-shake')
+  cannotBackspaceErrorTimeout = setTimeout(() => {
+    relativeHTMLElement.classList.remove('error-shake')
+  }, 800)
+  console.log("errorCode", errorCode);
+}
 </script>
 
 <template>
@@ -198,9 +233,12 @@ function getNewOutlineItemId() {
         <LexicalListPlugin />
         <LexicalLinkPlugin />
         <LexicalHashtagPlugin />
-        <OutlineViewPlugin :getNewOutlineItemId="getNewOutlineItemId"/>
+        <OutlineViewPlugin
+            :getNewOutlineItemId="getNewOutlineItemId"
+            @cannotBackspace="onCannotBackspaceError"
+        />
         <OutlineBulletIconPlugin />
-        <OutlineCheckPlugin />
+        <OutlineCheckPlugin @check-error="onCheckError" />
         <LexicalCodeHighlightPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
       </div>

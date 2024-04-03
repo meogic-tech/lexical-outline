@@ -1,5 +1,5 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
-import {$getParentOutline, $getParentOutlineItem} from "@/table-util";
+import {$getParentOutline, $getParentOutlineItem} from "@/outline-util";
 import {$isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
 type NodeId = string
 export type SerializedOutlineNode = Spread<

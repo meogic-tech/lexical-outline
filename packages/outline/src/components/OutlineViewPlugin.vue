@@ -16,10 +16,16 @@ import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNo
 import {
   $getOffsetInParent,
   $getParentOutline, $getParentOutlineItem,
-} from "@/table-util";
+} from "@/outline-util";
 import {$createOutlineItemContentNode, OutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 import {$isCodeHighlightNode, $isCodeNode} from "@lexical/code";
+import {
+  CANNOT_BACKSPACE_ERROR_CODE_1,
+  CANNOT_BACKSPACE_ERROR_CODE_2,
+  CANNOT_BACKSPACE_ERROR_CODE_3,
+  CannotBackspaceErrorCodeType
+} from "@/util";
 
 
 const editor = useEditor()
@@ -32,6 +38,10 @@ let unregister: () => void
 
 const internal$CreateParagraphNode = props.createParagraphNode ?? $createParagraphNode
 const internal$isCodeNode = props.isCodeNode ?? $isCodeNode
+
+const emit = defineEmits<{
+  (event: 'cannotBackspace', relativeHTMLElement: HTMLElement | null, errorCode: CannotBackspaceErrorCodeType): void;
+}>();
 
 function indent(): boolean {
   const selection = $getSelection()
@@ -324,6 +334,7 @@ onMounted(() => {
         if (siblingsOutlineItem.length === 1) {
           console.debug("cannot backspace because it is the last outline item in root outline node");
           event.preventDefault()
+          emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_1)
           return true
         }
         // 原本这里return false似乎可以有默认的操作
@@ -334,6 +345,7 @@ onMounted(() => {
       }
       if (offset === 0 && outlineItemNode.getChildOutlineNode()) {
         console.debug("cannot backspace because it has child outline items");
+        emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_2)
         event.preventDefault()
         return true
       }
@@ -359,6 +371,7 @@ onMounted(() => {
           if (childOutlineItemNodes && childOutlineItemNodes?.length > 0) {
             console.debug("cannot backspace because it is the first outline item in outline node and it has child outline items");
             event.preventDefault()
+            emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_3)
             return true
           }
         }
