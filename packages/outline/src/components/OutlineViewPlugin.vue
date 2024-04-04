@@ -6,10 +6,10 @@ import {
   $getSelection, $isElementNode,
   $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW, ElementNode,
-  INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DOWN_COMMAND,
+  INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
 } from "lexical";
-import { mergeRegister } from '@lexical/utils';
+import {mergeRegister} from '@lexical/utils';
 import {$createBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode, NodeId, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
@@ -23,8 +23,8 @@ import {$isCodeHighlightNode, $isCodeNode} from "@lexical/code";
 import {
   CANNOT_BACKSPACE_ERROR_CODE_1,
   CANNOT_BACKSPACE_ERROR_CODE_2,
-  CANNOT_BACKSPACE_ERROR_CODE_3,
-  CannotBackspaceErrorCodeType
+  CANNOT_BACKSPACE_ERROR_CODE_3, CANNOT_DELETE_ERROR_CODE_1, CANNOT_DELETE_ERROR_CODE_2, CANNOT_DELETE_ERROR_CODE_3,
+  CannotBackspaceErrorCodeType, CannotDeleteErrorCodeType
 } from "@/util";
 
 
@@ -160,7 +160,7 @@ const onClick = (event: MouseEvent) => {
   }
 }
 
-function $addNewOutlineItemNode(selection: RangeSelection, anchor:  ElementNode | TextNode) {
+function $addNewOutlineItemNode(selection: RangeSelection, anchor: ElementNode | TextNode) {
   const newParagraphNode = internal$CreateParagraphNode()
   const parentOutlineItemNode = $getParentOutlineItem(anchor)
   if (parentOutlineItemNode === null) {
@@ -196,33 +196,13 @@ function $addNewOutlineItemNode(selection: RangeSelection, anchor:  ElementNode 
   newParagraphNode.select(0, 0)
 }
 
-function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): ElementNode | null {
-  const outlineItemContentNode = outlineItemNode.getOutlineItemContentNode()
-  if (!outlineItemContentNode) {
-    return null
-  }
-  /**
-   * 现在outlineItemContentNode下第一个是bullet icon node
-   * 第二个才是paragraph node之类的
-   */
-  const content = outlineItemContentNode.getLastChild()
-  if (outlineItemContentNode.getChildrenSize() === 1) {
-    return content as ElementNode | null
-  }
-  const childOutlineNode = outlineItemNode.getChildOutlineNode()
-  if (childOutlineNode)  {
-    const lastOutlineItemNode = childOutlineNode.getLastChild()
-    if ($isOutlineItemNode(lastOutlineItemNode)) {
-      return $getTheLastContentInOutlineItem(lastOutlineItemNode)
-    }
-  }
-  return null
-}
-
 onMounted(() => {
   editor.getRootElement()!.addEventListener('click', onClick)
   unregister = mergeRegister(
-    editor.registerCommand(COLLAPSE_OUTLINE_COMMAND, (payload: { outlineItemKey: string, collapsed: boolean }, editor) => {
+    editor.registerCommand(COLLAPSE_OUTLINE_COMMAND, (payload: {
+      outlineItemKey: string,
+      collapsed: boolean
+    }, editor) => {
       const selection = $getSelection()
       if (!$isRangeSelection(selection)) {
         console.warn('not range selection')
@@ -305,124 +285,6 @@ onMounted(() => {
     //   }
     //   return false
     // }, COMMAND_PRIORITY_HIGH),
-    editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
-      const selection = $getSelection()
-      if (!$isRangeSelection(selection)) {
-        return false
-      }
-      const nodes = selection.getNodes()
-      if (nodes.length !== 1) {
-        return false
-      }
-      const node = nodes[0]
-      const outlineItemNode = $getParentOutlineItem(node)
-      if (!outlineItemNode) {
-        return false
-      }
-      const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
-      const outlineNode = $getParentOutline(node)
-      if (!outlineNode) {
-        console.warn("cannot find parent outline by node", node)
-        return false
-      }
-      const rootOutlineNode = outlineNode.getRootOutlineNode()
-      if (!rootOutlineNode)  {
-        console.warn("cannot find root outline by node", outlineNode)
-        return false
-      }
-      if (outlineNode === rootOutlineNode) {
-        if (siblingsOutlineItem.length === 1) {
-          console.debug("cannot backspace because it is the last outline item in root outline node");
-          event.preventDefault()
-          emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_1)
-          return true
-        }
-        // 原本这里return false似乎可以有默认的操作
-      }
-      let offset = selection.anchor.offset
-      if ($isTextNode(node)) {
-        offset = $getOffsetInParent(node, selection.anchor.offset)
-      }
-      if (offset === 0 && outlineItemNode.getChildOutlineNode()) {
-        console.debug("cannot backspace because it has child outline items");
-        emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_2)
-        event.preventDefault()
-        return true
-      }
-      if(offset === 0) {
-        // 选中上一个
-        const index = siblingsOutlineItem.indexOf(outlineItemNode)
-        if (index === 0) {
-          /**
-           * - outline
-           *   - outline-item
-           *    - outline-item-content
-           *      - bullet-icon
-           *      - paragraph
-           *    - outline
-           *      - outline-item
-           *        - outline-item-content
-           *          - bullet-icon
-           *          - paragraph
-           *          ^ cursor
-           */
-          const childOutlineNode = outlineItemNode.getChildOutlineNode()
-          const childOutlineItemNodes = childOutlineNode?.getOutlineItemNodes()
-          if (childOutlineItemNodes && childOutlineItemNodes?.length > 0) {
-            console.debug("cannot backspace because it is the first outline item in outline node and it has child outline items");
-            event.preventDefault()
-            emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_3)
-            return true
-          }
-        }
-        let targetContent: ElementNode | null = null
-        const previousOutlineItemNode = siblingsOutlineItem[index - 1]
-        if (previousOutlineItemNode) {
-          /**
-           * 因为是要聚焦上个outlineItem，而它又是可能有子节点的，所以要调用这个来递归获取
-           * - outline
-           *   - outline-item
-           *     - bullet-icon
-           *     - outline-item-content
-           *       - paragraph
-           *       - outline
-           *         - outline-item
-           *           - bullet-icon
-           *           - outline-item-content
-           *             - paragraph
-           *             - outline
-           *               - outline-item
-           *                 - bullet-icon
-           *                 - outline-item-content
-           *                   - paragraph                <-- need to select here
-           *         - outline-item
-           *           - bullet-icon
-           *           - outline-item-content
-           *             - paragraph                      <-- when backspace as first of this paragraph
-           */
-          targetContent = $getTheLastContentInOutlineItem(previousOutlineItemNode)
-        } else {
-          const parentOutlineItemNode = $getParentOutlineItem(outlineNode)
-          if (parentOutlineItemNode) {
-            /**
-             * 因为确定了要聚焦的父层级的outlineItem，所以直接获取它的第一个content即可
-             */
-            // @ts-ignore
-            targetContent = parentOutlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
-          }
-        }
-        targetContent?.selectEnd()
-        const firstContent = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
-        if (firstContent) {
-          targetContent?.append(...firstContent.getChildren())
-        }
-        outlineNode.getChildrenSize() === 1 && outlineNode.remove()
-        outlineItemNode.remove()
-        event.preventDefault()
-        return true
-      }
-      return false
-    }, COMMAND_PRIORITY_HIGH),
   )
 })
 

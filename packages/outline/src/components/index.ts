@@ -14,3 +14,11 @@ export {
 export {
   default as LexicalCodeHighlightPlugin
 } from './LexicalCodeHighlightPlugin.vue'
+
+export {
+  default as OutlineDeletePlugin
+} from './OutlineDeletePlugin.vue'
+
+export {
+  default as OutlineBackspacePlugin
+} from './OutlineBackspacePlugin.vue'

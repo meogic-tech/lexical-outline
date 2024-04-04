@@ -29,10 +29,12 @@ import {
   $createBulletIconNode,
   $createOutlineItemContentNode, OutlineItemContentNode,
   OutlineCheckPlugin,
-  LexicalCodeHighlightPlugin
+  LexicalCodeHighlightPlugin,
+  OutlineDeletePlugin,
+  OutlineBackspacePlugin,
+  CannotBackspaceErrorCodeType
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
-import {CannotBackspaceErrorCodeType} from "lexical-outline/dist";
 
 let unregister: () => void
 
@@ -235,12 +237,13 @@ const onCannotBackspaceError = (relativeHTMLElement: HTMLElement | null, errorCo
         <LexicalHashtagPlugin />
         <OutlineViewPlugin
             :getNewOutlineItemId="getNewOutlineItemId"
-            @cannotBackspace="onCannotBackspaceError"
         />
         <OutlineBulletIconPlugin />
         <OutlineCheckPlugin @check-error="onCheckError" />
         <LexicalCodeHighlightPlugin />
         <LexicalMarkdownShortcutPlugin :transformers="[...TEXT_FORMAT_TRANSFORMERS, ...TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE]"/>
+        <OutlineDeletePlugin @cannotDelete="onCannotBackspaceError"/>
+        <OutlineBackspacePlugin @cannotBackspace="onCannotBackspaceError"/>
       </div>
     </div>
   </LexicalComposer>
