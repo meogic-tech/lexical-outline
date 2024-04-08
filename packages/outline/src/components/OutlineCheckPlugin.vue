@@ -207,7 +207,11 @@ useMounted(() => {
         if (!outlineItemNode) {
           return
         }
-        const element = editor.getElementByKey(outlineItemNode.getKey())
+        const outlineItemContentNode = (outlineItemNode as OutlineItemNode).getOutlineItemContentNode()
+        if (!outlineItemContentNode) {
+          return
+        }
+        const element = editor.getElementByKey(outlineItemContentNode.getKey())
         emit('checkError', element)
       })
     }

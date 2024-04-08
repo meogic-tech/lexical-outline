@@ -73,7 +73,11 @@ onMounted(() => {
       console.warn("cannot find root outline by node", outlineNode)
       return false
     }
-    if (outlineNode === rootOutlineNode) {
+    let offset = selection.anchor.offset
+    if ($isTextNode(node)) {
+      offset = $getOffsetInParent(node, selection.anchor.offset)
+    }
+    if (outlineNode === rootOutlineNode && offset === 0) {
       if (siblingsOutlineItem.length === 1) {
         console.debug("cannot backspace because it is the last outline item in root outline node");
         event.preventDefault()
@@ -81,10 +85,6 @@ onMounted(() => {
         return true
       }
       // 原本这里return false似乎可以有默认的操作
-    }
-    let offset = selection.anchor.offset
-    if ($isTextNode(node)) {
-      offset = $getOffsetInParent(node, selection.anchor.offset)
     }
     if (offset === 0 && outlineItemNode.getChildOutlineNode()) {
       console.debug("cannot backspace because it has child outline items");
