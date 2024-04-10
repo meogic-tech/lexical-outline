@@ -12,7 +12,6 @@ import {
 
 export type SerializedBulletIconNode = Spread<
   {
-    type: 'bullet-icon'
   },
   SerializedElementNode
 >;
