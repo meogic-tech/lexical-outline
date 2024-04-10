@@ -25,16 +25,21 @@ import {
   $createOutlineNode,
   OutlineItemNode,
   $createOutlineItemNode,
-  BulletIconNode,
-  $createBulletIconNode,
   $createOutlineItemContentNode, OutlineItemContentNode,
   OutlineCheckPlugin,
   LexicalCodeHighlightPlugin,
   OutlineDeletePlugin,
   OutlineBackspacePlugin,
-  CannotBackspaceErrorCodeType
+  CannotBackspaceErrorCodeType,
+  BulletIconNode,
+  $createBulletIconNode
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
+import {
+  NewBulletIconNode as NewBulletIconNode,
+  $createBulletIconNode as new$createBulletIconNode,
+  $createNewBulletIconNode
+} from "@/nodes/NewBulletIconNode";
 
 let unregister: () => void
 
@@ -157,7 +162,13 @@ const config = {
     OutlineNode,
     OutlineItemNode,
     OutlineItemContentNode,
-    BulletIconNode,
+    NewBulletIconNode,
+    {
+      replace: BulletIconNode,
+      with(node) {
+        return $createNewBulletIconNode()
+      },
+    },
   ],
   editable: true,
   editorState: preOutlineText,
