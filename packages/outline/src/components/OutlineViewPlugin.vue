@@ -10,7 +10,7 @@ import {
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
 } from "lexical";
 import {mergeRegister} from '@lexical/utils';
-import {$createBulletIconNode} from "@/nodes/BulletIconNode";
+import {$createBulletIconNode, $isBulletIconNode} from "@/nodes/BulletIconNode";
 import {$createOutlineItemNode, $isOutlineItemNode, NodeId, OutlineItemNode} from "@/nodes/OutlineItemNode";
 import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
 import {
@@ -125,6 +125,10 @@ function outdent(): boolean {
 const onClick = (event: MouseEvent) => {
   // .editor-outline-chevron-container
   const target = event.target as HTMLElement
+  const chevronContainer = target.closest('.editor-outline-chevron-container')
+  if (!chevronContainer) {
+    return
+  }
   const spot = target.closest('.editor-outline-item-spot')
   if (!spot) {
     return
@@ -137,7 +141,7 @@ const onClick = (event: MouseEvent) => {
           return false
         }
         const outlineItem = $getParentOutlineItem(node)
-        if ($isOutlineItemNode(outlineItem)) {
+        if ($isOutlineItemNode(outlineItem) && outlineItem.getChildOutlineNode()) {
           return true
         }
       })
@@ -185,7 +189,7 @@ function $addNewOutlineItemNode(selection: RangeSelection, anchor: ElementNode |
   const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
   outlineItemNode
       .append($createOutlineItemContentNode()
-          .append($createBulletIconNode())
+          .append($createBulletIconNode(false))
           .append(newParagraphNode))
   const childOutline = parentOutlineItemNode.getChildOutlineNode()
   if (childOutline && !parentOutlineItemNode.getCollapsed()) {
@@ -214,6 +218,11 @@ onMounted(() => {
       }
       outlineItemNode.setCollapsed(payload.collapsed)
       outlineItemNode.getChildOutlineNode()?.setDisplay(!payload.collapsed)
+      const firstChild = outlineItemNode.getOutlineItemContentNode()?.getFirstChild()
+      if (!$isBulletIconNode(firstChild)) {
+        return false
+      }
+      firstChild.setRotated(payload.collapsed)
       return false
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(INSERT_PARAGRAPH_COMMAND, (payload, editor) => {

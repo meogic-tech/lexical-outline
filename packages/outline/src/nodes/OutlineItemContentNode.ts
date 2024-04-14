@@ -2,7 +2,6 @@ import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, Serializ
 type NodeId = string
 export type SerializedOutlineItemContentNode = Spread<
   {
-    type: 'outline-item-content'
   },
   SerializedElementNode
 >;

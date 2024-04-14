@@ -5,7 +5,6 @@ type NodeId = string
 export type SerializedOutlineNode = Spread<
   {
     display: boolean
-    type: 'outline'
   },
   SerializedElementNode
 >;

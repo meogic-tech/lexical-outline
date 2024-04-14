@@ -6,7 +6,6 @@ export type SerializedOutlineItemNode = Spread<
   {
     id: NodeId
     collapsed: boolean
-    type: 'outline-item'
   },
   SerializedElementNode
 >;
