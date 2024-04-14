@@ -101,7 +101,7 @@ onMounted(() => {
       return false
     }
     const nodes = selection.getNodes()
-    if (nodes.length !== 1) {
+    if (nodes.length !== 1 || !selection.isCollapsed()) {
       return false
     }
     const node = nodes[0]
@@ -112,18 +112,16 @@ onMounted(() => {
     const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
     const outlineNode = outlineItemNode.getChildOutlineNode()
     const childrenOutlineItemNodes = outlineNode?.getOutlineItemNodes() ?? []
-    let offset = selection.anchor.offset
+    let offset = selection.focus.offset
     // 判断是否在行末
     if ($isTextNode(node)) {
-      offset = $getOffsetInParent(node, selection.anchor.offset)
+      offset = $getOffsetInParent(node, selection.focus.offset)
     }
     const parentTextLength = node.getParent()?.getTextContentSize()
     // 只处理当前光标在行末的情况
     if (offset !== parentTextLength) {
       return false
     }
-    console.log("siblingsOutlineItem", siblingsOutlineItem);
-    console.log("childrenOutlineItemNodes", childrenOutlineItemNodes);
 
     const result = $appendSiblingOutlineItem(event, outlineItemNode, siblingsOutlineItem)
     if (result) {

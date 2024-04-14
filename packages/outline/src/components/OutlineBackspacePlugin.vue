@@ -50,11 +50,12 @@ function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): Elem
 onMounted(() => {
   unregisterListener = editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
     const selection = $getSelection()
+    debugger
     if (!$isRangeSelection(selection)) {
       return false
     }
     const nodes = selection.getNodes()
-    if (nodes.length !== 1) {
+    if (nodes.length !== 1 || !selection.isCollapsed()) {
       return false
     }
     const node = nodes[0]
@@ -73,9 +74,9 @@ onMounted(() => {
       console.warn("cannot find root outline by node", outlineNode)
       return false
     }
-    let offset = selection.anchor.offset
+    let offset = selection.focus.offset
     if ($isTextNode(node)) {
-      offset = $getOffsetInParent(node, selection.anchor.offset)
+      offset = $getOffsetInParent(node, selection.focus.offset)
     }
     if (outlineNode === rootOutlineNode && offset === 0) {
       if (siblingsOutlineItem.length === 1) {
