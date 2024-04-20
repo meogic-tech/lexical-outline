@@ -50,7 +50,6 @@ function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): Elem
 onMounted(() => {
   unregisterListener = editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
     const selection = $getSelection()
-    debugger
     if (!$isRangeSelection(selection)) {
       return false
     }
