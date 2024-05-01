@@ -10,14 +10,14 @@ import {
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
 } from "lexical";
 import {mergeRegister} from '@lexical/utils';
-import {$createBulletIconNode, $isBulletIconNode} from "@/nodes/BulletIconNode";
-import {$createOutlineItemNode, $isOutlineItemNode, NodeId, OutlineItemNode} from "@/nodes/OutlineItemNode";
-import {$createOutlineNode, $isOutlineNode, OutlineNode} from "@/nodes/OutlineNode";
+import {$createLexicalBulletIconNode, $isLexicalBulletIconNode} from "@/nodes/LexicalBulletIconNode";
+import {$createLexicalOutlineItemNode, $isLexicalOutlineItemNode, NodeId, LexicalOutlineItemNode} from "@/nodes/LexicalOutlineItemNode";
+import {$createLexicalOutlineNode, $isLexicalOutlineNode, LexicalOutlineNode} from "@/nodes/LexicalOutlineNode";
 import {
   $getOffsetInParent,
   $getParentOutline, $getParentOutlineItem,
 } from "@/outline-util";
-import {$createOutlineItemContentNode, OutlineItemContentNode} from "@/nodes";
+import {$createLexicalOutlineItemContentNode, LexicalOutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 import {$isCodeHighlightNode, $isCodeNode} from "@lexical/code";
 import {
@@ -57,10 +57,10 @@ function indent(): boolean {
       return false
     }
     const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
-    if ($isOutlineItemNode(outlineItemNode) && $isOutlineItemNode(previousOutlineItemNode)) {
+    if ($isLexicalOutlineItemNode(outlineItemNode) && $isLexicalOutlineItemNode(previousOutlineItemNode)) {
       let outlineNode = previousOutlineItemNode.getChildOutlineNode()
       if (!outlineNode) {
-        outlineNode = $createOutlineNode(true)
+        outlineNode = $createLexicalOutlineNode(true)
         previousOutlineItemNode.append(outlineNode)
       }
       outlineNode.append(outlineItemNode)
@@ -141,7 +141,7 @@ const onClick = (event: MouseEvent) => {
           return false
         }
         const outlineItem = $getParentOutlineItem(node)
-        if ($isOutlineItemNode(outlineItem) && outlineItem.getChildOutlineNode()) {
+        if ($isLexicalOutlineItemNode(outlineItem) && outlineItem.getChildOutlineNode()) {
           return true
         }
       })
@@ -152,7 +152,7 @@ const onClick = (event: MouseEvent) => {
             return false
           }
           const outlineItem = $getParentOutlineItem(node)
-          if ($isOutlineItemNode(outlineItem)) {
+          if ($isLexicalOutlineItemNode(outlineItem)) {
             editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
               outlineItemKey: outlineItem.getKey(),
               collapsed: !outlineItem.getCollapsed()
@@ -186,10 +186,10 @@ function $addNewOutlineItemNode(selection: RangeSelection, anchor: ElementNode |
       newParagraphNode.append(nodesToMove[i]);
     }
   }
-  const outlineItemNode = $createOutlineItemNode(props.getNewOutlineItemId(), false)
+  const outlineItemNode = $createLexicalOutlineItemNode(props.getNewOutlineItemId(), false)
   outlineItemNode
-      .append($createOutlineItemContentNode()
-          .append($createBulletIconNode(false))
+      .append($createLexicalOutlineItemContentNode()
+          .append($createLexicalBulletIconNode(false))
           .append(newParagraphNode))
   const childOutline = parentOutlineItemNode.getChildOutlineNode()
   if (childOutline && !parentOutlineItemNode.getCollapsed()) {
@@ -207,19 +207,14 @@ onMounted(() => {
       outlineItemKey: string,
       collapsed: boolean
     }, editor) => {
-      const selection = $getSelection()
-      if (!$isRangeSelection(selection)) {
-        console.warn('not range selection')
-        return false
-      }
       const outlineItemNode = $getNodeByKey(payload.outlineItemKey)
-      if (!$isOutlineItemNode(outlineItemNode)) {
+      if (!$isLexicalOutlineItemNode(outlineItemNode)) {
         return false;
       }
       outlineItemNode.setCollapsed(payload.collapsed)
       outlineItemNode.getChildOutlineNode()?.setDisplay(!payload.collapsed)
       const firstChild = outlineItemNode.getOutlineItemContentNode()?.getFirstChild()
-      if (!$isBulletIconNode(firstChild)) {
+      if (!$isLexicalBulletIconNode(firstChild)) {
         return false
       }
       firstChild.setRotated(payload.collapsed)

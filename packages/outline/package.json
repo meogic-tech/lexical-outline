@@ -1,16 +1,16 @@
 {
   "name": "lexical-outline",
-  "version": "0.1.11",
+  "version": "0.1.14",
   "description": "lexical-outline",
   "private": false,
   "author": "warren",
   "license": "ISC",
   "types": "dist/index.d.ts",
-  "main": "dist/lexical-outline-vue.umd.js",
-  "module": "dist/lexical-outline-vue.es.js",
+  "main": "dist/LexicalOutline.prod.js",
+  "module": "dist/LexicalOutline.mjs",
   "scripts": {
     "tsc": "npx vue-tsc --declaration --emitDeclarationOnly",
-    "build": "vite build && npm run tsc",
+    "build": "node scripts/build.js",
     "build:dev": "vite build --mode development && npm run tsc",
     "build:watch": "vite build --watch --mode development && npm run tsc",
     "publish:patch": "npm version patch && npm run build && npm publish "
@@ -34,5 +34,20 @@
     "vue-tsc": "^1.8.5",
     "@lexical/utils": "^0.12.6",
     "@lexical/code": "^0.12.6"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "development": "./dist/LexicalOutline.dev.mjs",
+        "production": "./dist/LexicalOutline.prod.mjs",
+        "default": "./LexicalOutline.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "development": "./dist/LexicalOutline.dev.js",
+        "production": "./dist/LexicalOutline.prod.js"
+      }
+    }
   }
 }

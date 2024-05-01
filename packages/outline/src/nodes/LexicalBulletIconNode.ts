@@ -10,14 +10,14 @@ import {
 } from "lexical";
 
 
-export type SerializedBulletIconNode = Spread<
+export type SerializedLexicalBulletIconNode = Spread<
   {
     rotated: boolean
   },
   SerializedElementNode
 >;
 
-export class BulletIconNode extends ElementNode {
+export class LexicalBulletIconNode extends ElementNode {
 
   _rotated: boolean
 
@@ -34,8 +34,8 @@ export class BulletIconNode extends ElementNode {
     return 'bullet-icon';
   }
 
-  static clone(node: BulletIconNode): BulletIconNode {
-    return new BulletIconNode(node._rotated, node.__key)
+  static clone(node: LexicalBulletIconNode): LexicalBulletIconNode {
+    return new LexicalBulletIconNode(node._rotated, node.__key)
   }
 
   constructor(rorated: boolean, key?: NodeKey) {
@@ -61,7 +61,7 @@ export class BulletIconNode extends ElementNode {
   }
 
   // 如果TextNode类有其他DOM更新逻辑，可能需要重写updateDOM方法
-  updateDOM(prevNode: BulletIconNode, dom: HTMLElement, _config: EditorConfig): boolean {
+  updateDOM(prevNode: LexicalBulletIconNode, dom: HTMLElement, _config: EditorConfig): boolean {
     if (this._rotated !== prevNode._rotated) {
       const button = dom.querySelector('button')
       if (!button) {
@@ -77,11 +77,11 @@ export class BulletIconNode extends ElementNode {
     return false;
   }
 
-  static importJSON(serializedNode: SerializedBulletIconNode): BulletIconNode {
-    return $createBulletIconNode(serializedNode.rotated);
+  static importJSON(serializedNode: SerializedLexicalBulletIconNode): LexicalBulletIconNode {
+    return $createLexicalBulletIconNode(serializedNode.rotated);
   }
 
-  exportJSON(): SerializedBulletIconNode {
+  exportJSON(): SerializedLexicalBulletIconNode {
     return {
       ...super.exportJSON(),
       rotated: this._rotated,
@@ -99,14 +99,14 @@ export class BulletIconNode extends ElementNode {
 }
 
 // 如果TextNode类有对应的工厂函数，也应该实现BulletIconNode的工厂函数
-export function $createBulletIconNode(rotated: boolean, key?: NodeKey): BulletIconNode {
-  return $applyNodeReplacement(new BulletIconNode(rotated, key));
+export function $createLexicalBulletIconNode(rotated: boolean, key?: NodeKey): LexicalBulletIconNode {
+  return $applyNodeReplacement(new LexicalBulletIconNode(rotated, key));
 }
 
 
 
-export function $isBulletIconNode(
+export function $isLexicalBulletIconNode(
   node: LexicalNode | null | undefined,
-): node is BulletIconNode {
-  return node instanceof BulletIconNode;
+): node is LexicalBulletIconNode {
+  return node instanceof LexicalBulletIconNode;
 }

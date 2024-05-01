@@ -10,7 +10,7 @@ import {
   COMMAND_PRIORITY_LOW, ParagraphNode,
   SELECTION_CHANGE_COMMAND
 } from "lexical";
-import {$isBulletIconNode} from "@/nodes";
+import {$isLexicalBulletIconNode} from "@/nodes";
 
 const editor = useEditor()
 
@@ -21,7 +21,7 @@ onMounted(() => {
       return false
     }
     const nodes = selection.getNodes()
-    if (nodes.length === 1 && $isBulletIconNode(nodes[0])) {
+    if (nodes.length === 1 && $isLexicalBulletIconNode(nodes[0])) {
       const bulletIconNode = nodes[0]
       let nextSibling = bulletIconNode.getNextSibling()
       if (!nextSibling) {
@@ -32,7 +32,7 @@ onMounted(() => {
     }
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i]
-      if ($isBulletIconNode(node)) {
+      if ($isLexicalBulletIconNode(node)) {
 
       }
     }

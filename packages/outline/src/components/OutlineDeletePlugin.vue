@@ -16,7 +16,7 @@ import {
   CannotBackspaceErrorCodeType,
   CannotDeleteErrorCodeType,
 } from "@/util";
-import {OutlineItemNode} from "@/nodes";
+import {LexicalOutlineItemNode} from "@/nodes";
 
 const editor = useEditor()
 let unregisterListener: () => void
@@ -27,8 +27,8 @@ const emit = defineEmits<{
 
 function $appendSiblingOutlineItem(
     event: KeyboardEvent,
-    outlineItemNode: OutlineItemNode,
-    siblingsOutlineItem: OutlineItemNode[]
+    outlineItemNode: LexicalOutlineItemNode,
+    siblingsOutlineItem: LexicalOutlineItemNode[]
 ): boolean {
   const index = siblingsOutlineItem.indexOf(outlineItemNode)
   // 第一个弟弟节点
@@ -59,8 +59,8 @@ function $appendSiblingOutlineItem(
 
 function $appendFirstChildOutlineItem(
     event: KeyboardEvent,
-    outlineItemNode: OutlineItemNode,
-    childrenOutlineItem: OutlineItemNode[]
+    outlineItemNode: LexicalOutlineItemNode,
+    childrenOutlineItem: LexicalOutlineItemNode[]
 ): boolean {
   // 第一个弟弟节点
   const firstChildOutlineItem = childrenOutlineItem[0]

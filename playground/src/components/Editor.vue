@@ -13,7 +13,7 @@ import {
   LexicalMarkdownShortcutPlugin
 } from 'lexical-vue'
 import {TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE} from '@lexical/markdown'
-import { $createHeadingNode, HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeHighlightNode, CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
@@ -21,23 +21,23 @@ import { HashtagNode } from '@lexical/hashtag'
 import {
   OutlineViewPlugin,
   OutlineBulletIconPlugin,
-  OutlineNode,
-  $createOutlineNode,
-  OutlineItemNode,
-  $createOutlineItemNode,
-  $createOutlineItemContentNode, OutlineItemContentNode,
+  LexicalOutlineNode,
+  $createLexicalOutlineNode,
+  LexicalOutlineItemNode,
+  $createLexicalOutlineItemNode,
+  $createLexicalOutlineItemContentNode, LexicalOutlineItemContentNode,
   OutlineCheckPlugin,
   LexicalCodeHighlightPlugin,
   OutlineDeletePlugin,
   OutlineBackspacePlugin,
   CannotBackspaceErrorCodeType,
-  BulletIconNode,
-  $createBulletIconNode
+  LexicalBulletIconNode,
+  $createLexicalBulletIconNode
 } from 'lexical-outline'
 import {onUnmounted,onMounted} from 'vue'
 import {
   NewBulletIconNode as NewBulletIconNode,
-  $createBulletIconNode as new$createBulletIconNode,
+  $createBulletIconNode as new$createLexicalBulletIconNode,
   $createNewBulletIconNode
 } from "@/nodes/NewBulletIconNode";
 
@@ -49,29 +49,29 @@ function preOutlineText() {
 
   
   if (root.getFirstChild() === null) {
-    const outline2 = $createOutlineNode(true)
-    const outlineItemNode2 = $createOutlineItemNode('id:2', false)
-        .append($createOutlineItemContentNode()
-            .append($createBulletIconNode())
+    const outline2 = $createLexicalOutlineNode(true)
+    const outlineItemNode2 = $createLexicalOutlineItemNode('id:2', false)
+        .append($createLexicalOutlineItemContentNode()
+            .append($createLexicalBulletIconNode())
             .append($createParagraphNode().append($createTextNode('Hello!'))))
-    const outlineItemNode3 = $createOutlineItemNode('id:3', false)
-        .append($createOutlineItemContentNode()
-            .append($createBulletIconNode())
+    const outlineItemNode3 = $createLexicalOutlineItemNode('id:3', false)
+        .append($createLexicalOutlineItemContentNode()
+            .append($createLexicalBulletIconNode())
             .append($createParagraphNode().append($createTextNode('World!'))))
     outline2.append(outlineItemNode2).append(outlineItemNode3)
 
-    const outline = $createOutlineNode(true)
-    const outlineItemNode = $createOutlineItemNode('id:1', false)
+    const outline = $createLexicalOutlineNode(true)
+    const outlineItemNode = $createLexicalOutlineItemNode('id:1', false)
     outline
         .append(outlineItemNode
-            .append($createOutlineItemContentNode()
-                .append($createBulletIconNode())
+            .append($createLexicalOutlineItemContentNode()
+                .append($createLexicalBulletIconNode())
                 .append($createParagraphNode()
                     .append($createTextNode('This is a '))
                     .append($createTextNode('playground').setFormat("bold"))
                     .append($createTextNode(' for the outline plugin.'))
                 )
-                // .append($createHeadingNode('h1').append($createTextNode('Welcome to the playground')))
+                // .append($createLexicalHeadingNode('h1').append($createTextNode('Welcome to the playground')))
             )
             .append(outline2)
         )
@@ -159,12 +159,12 @@ const config = {
     AutoLinkNode,
     LinkNode,
     HashtagNode,
-    OutlineNode,
-    OutlineItemNode,
-    OutlineItemContentNode,
+    LexicalOutlineNode,
+    LexicalOutlineItemNode,
+    LexicalOutlineItemContentNode,
     NewBulletIconNode,
     {
-      replace: BulletIconNode,
+      replace: LexicalBulletIconNode,
       with(node) {
         return $createNewBulletIconNode()
       },

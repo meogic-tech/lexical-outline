@@ -16,7 +16,7 @@ import {
   KEY_BACKSPACE_COMMAND
 } from "lexical";
 import {$getOffsetInParent, $getParentOutline, $getParentOutlineItem} from "@/outline-util";
-import {$isOutlineItemNode, OutlineItemNode} from "@/nodes";
+import {$isLexicalOutlineItemNode, LexicalOutlineItemNode} from "@/nodes";
 
 const editor = useEditor()
 let unregisterListener: () => void
@@ -24,7 +24,7 @@ const emit = defineEmits<{
   (event: 'cannotBackspace', relativeHTMLElement: HTMLElement | null, errorCode: CannotBackspaceErrorCodeType): void;
 }>();
 
-function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): ElementNode | null {
+function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineItemNode): ElementNode | null {
   const outlineItemContentNode = outlineItemNode.getOutlineItemContentNode()
   if (!outlineItemContentNode) {
     return null
@@ -40,7 +40,7 @@ function $getTheLastContentInOutlineItem(outlineItemNode: OutlineItemNode): Elem
   const childOutlineNode = outlineItemNode.getChildOutlineNode()
   if (childOutlineNode) {
     const lastOutlineItemNode = childOutlineNode.getLastChild()
-    if ($isOutlineItemNode(lastOutlineItemNode)) {
+    if ($isLexicalOutlineItemNode(lastOutlineItemNode)) {
       return $getTheLastContentInOutlineItem(lastOutlineItemNode)
     }
   }

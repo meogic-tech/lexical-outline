@@ -1,19 +1,19 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
 type NodeId = string
-export type SerializedOutlineItemContentNode = Spread<
+export type SerializedLexicalOutlineItemContentNode = Spread<
   {
   },
   SerializedElementNode
 >;
 
-export class OutlineItemContentNode extends ElementNode {
+export class LexicalOutlineItemContentNode extends ElementNode {
 
   static getType(): string {
     return 'outline-item-content';
   }
 
-  static clone(node: OutlineItemContentNode): OutlineItemContentNode {
-    return new OutlineItemContentNode(node.__key)
+  static clone(node: LexicalOutlineItemContentNode): LexicalOutlineItemContentNode {
+    return new LexicalOutlineItemContentNode(node.__key)
   }
 
   constructor(key?: NodeKey) {
@@ -26,15 +26,15 @@ export class OutlineItemContentNode extends ElementNode {
     return div;
   }
 
-  updateDOM(prevNode: OutlineItemContentNode, _: HTMLElement, _config: EditorConfig): boolean {
+  updateDOM(prevNode: LexicalOutlineItemContentNode, _: HTMLElement, _config: EditorConfig): boolean {
     return false;
   }
 
-  static importJSON(serializedNode: SerializedOutlineItemContentNode): OutlineItemContentNode {
-    return $createOutlineItemContentNode();
+  static importJSON(serializedNode: SerializedLexicalOutlineItemContentNode): LexicalOutlineItemContentNode {
+    return $createLexicalOutlineItemContentNode();
   }
 
-  exportJSON(): SerializedOutlineItemContentNode {
+  exportJSON(): SerializedLexicalOutlineItemContentNode {
     return {
       ...super.exportJSON(),
       type: 'outline-item-content',
@@ -56,12 +56,12 @@ export class OutlineItemContentNode extends ElementNode {
   }
 }
 
-export function $createOutlineItemContentNode(key?: NodeKey): OutlineItemContentNode {
-  return new OutlineItemContentNode(key);
+export function $createLexicalOutlineItemContentNode(key?: NodeKey): LexicalOutlineItemContentNode {
+  return new LexicalOutlineItemContentNode(key);
 }
 
-export function $isOutlineItemContentNode(
+export function $isLexicalOutlineItemContentNode(
   node: LexicalNode | null | undefined,
-): node is OutlineItemContentNode {
-  return node instanceof OutlineItemContentNode;
+): node is LexicalOutlineItemContentNode {
+  return node instanceof LexicalOutlineItemContentNode;
 }

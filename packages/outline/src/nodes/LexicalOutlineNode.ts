@@ -1,8 +1,8 @@
 import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
 import {$getParentOutline, $getParentOutlineItem} from "@/outline-util";
-import {$isOutlineItemNode, OutlineItemNode} from "@/nodes/OutlineItemNode";
+import {$isLexicalOutlineItemNode, LexicalOutlineItemNode} from "@/nodes/LexicalOutlineItemNode";
 type NodeId = string
-export type SerializedOutlineNode = Spread<
+export type SerializedLexicalOutlineNode = Spread<
   {
     display: boolean
   },
@@ -25,7 +25,7 @@ export type SerializedOutlineNode = Spread<
  *  - outline-item-content
  *    - paragraph
  */
-export class OutlineNode extends ElementNode {
+export class LexicalOutlineNode extends ElementNode {
 
   _display: boolean
 
@@ -42,8 +42,8 @@ export class OutlineNode extends ElementNode {
     return 'outline';
   }
 
-  static clone(node: OutlineNode): OutlineNode {
-    return new OutlineNode(node._display, node.__key)
+  static clone(node: LexicalOutlineNode): LexicalOutlineNode {
+    return new LexicalOutlineNode(node._display, node.__key)
   }
 
   constructor(display: boolean, key?: NodeKey) {
@@ -61,7 +61,7 @@ export class OutlineNode extends ElementNode {
     return div;
   }
 
-  updateDOM(prevNode: OutlineNode, dom: HTMLElement, _config: EditorConfig): boolean {
+  updateDOM(prevNode: LexicalOutlineNode, dom: HTMLElement, _config: EditorConfig): boolean {
     if (this._display !== prevNode._display) {
       if (this._display) {
         dom.style.maxHeight = ''
@@ -75,11 +75,11 @@ export class OutlineNode extends ElementNode {
     return false;
   }
 
-  static importJSON(serializedNode: SerializedOutlineNode): OutlineNode {
-    return $createOutlineNode(serializedNode.display);
+  static importJSON(serializedNode: SerializedLexicalOutlineNode): LexicalOutlineNode {
+    return $createLexicalOutlineNode(serializedNode.display);
   }
 
-  exportJSON(): SerializedOutlineNode {
+  exportJSON(): SerializedLexicalOutlineNode {
     return {
       ...super.exportJSON(),
       display: this._display,
@@ -87,11 +87,11 @@ export class OutlineNode extends ElementNode {
     };
   }
 
-  getOutlineItemNodes(): OutlineItemNode[] {
+  getOutlineItemNodes(): LexicalOutlineItemNode[] {
     const children = this.getChildren()
-    const result: OutlineItemNode[] = []
+    const result: LexicalOutlineItemNode[] = []
     for (const child of children) {
-      if ($isOutlineItemNode(child)) {
+      if ($isLexicalOutlineItemNode(child)) {
         result.push(child)
       }
     }
@@ -103,19 +103,19 @@ export class OutlineNode extends ElementNode {
    *   └ (71) outline
    * @param node
    */
-  getRootOutlineNode(): OutlineNode {
+  getRootOutlineNode(): LexicalOutlineNode {
     const parent = $getParentOutline(this)
     if (parent === null) return this
     return parent.getRootOutlineNode()
   }
 }
 
-export function $createOutlineNode(display: boolean, key?: NodeKey): OutlineNode {
-  return new OutlineNode(display, key);
+export function $createLexicalOutlineNode(display: boolean, key?: NodeKey): LexicalOutlineNode {
+  return new LexicalOutlineNode(display, key);
 }
 
-export function $isOutlineNode(
+export function $isLexicalOutlineNode(
   node: LexicalNode | null | undefined,
-): node is OutlineNode {
-  return node instanceof OutlineNode;
+): node is LexicalOutlineNode {
+  return node instanceof LexicalOutlineNode;
 }

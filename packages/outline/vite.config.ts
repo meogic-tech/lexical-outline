@@ -13,8 +13,18 @@ export default defineConfig(({mode}) => {
       minify: mode === 'production',
       lib: {
         entry: 'src/index.ts',
-        name: 'LexicalOutLineVue',
-        fileName: (format) => `lexical-outline-vue.${format}.js`
+        name: 'LexicalOutline',
+        formats: ['es', 'cjs'],
+        fileName: (format) => {
+          // 根据不同环境生成不同文件名
+          const suffix = mode === 'production' ? 'prod' : 'dev';
+          if (format === 'es') {
+            return `LexicalOutline.${suffix}.mjs`;
+          } else {
+            return `LexicalOutline.${suffix}.js`;
+          }
+
+        }
       },
       rollupOptions: {
         external: [

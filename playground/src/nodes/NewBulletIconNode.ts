@@ -6,15 +6,15 @@ import type {
   Spread,
   TextNode,
 } from 'lexical';
-import {BulletIconNode, SerializedBulletIconNode} from "lexical-outline";
+import {LexicalBulletIconNode, SerializedLexicalBulletIconNode} from "lexical-outline";
 
 export type SerializedNewBulletIconNode = Spread<
   {
   },
-  SerializedBulletIconNode
+  SerializedLexicalBulletIconNode
 >;
 
-export class NewBulletIconNode extends BulletIconNode {
+export class NewBulletIconNode extends LexicalBulletIconNode {
   static getType(): string {
     return 'new-bullet-icon';
   }
@@ -45,7 +45,7 @@ export class NewBulletIconNode extends BulletIconNode {
   }
 
   // 如果TextNode类有其他DOM更新逻辑，可能需要重写updateDOM方法
-  updateDOM(prevNode: BulletIconNode, dom: HTMLElement, _config: EditorConfig): boolean {
+  updateDOM(prevNode: LexicalBulletIconNode, dom: HTMLElement, _config: EditorConfig): boolean {
     if (this._rotated !== prevNode._rotated) {
       const button = dom.querySelector('button')
       if (!button) {

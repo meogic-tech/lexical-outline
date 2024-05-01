@@ -2,13 +2,13 @@
 import {useEditor, useMounted} from "lexical-vue";
 import {$getRoot, $getSelection, $isElementNode, $isRangeSelection, ElementNode} from "lexical";
 import {
-  $isBulletIconNode,
-  $isOutlineItemContentNode,
-  $isOutlineItemNode,
-  $isOutlineNode,
-  OutlineItemContentNode,
-  OutlineItemNode,
-  OutlineNode
+  $isLexicalBulletIconNode,
+  $isLexicalOutlineItemContentNode,
+  $isLexicalOutlineItemNode,
+  $isLexicalOutlineNode,
+  LexicalOutlineItemContentNode,
+  LexicalOutlineItemNode,
+  LexicalOutlineNode
 } from "@/nodes";
 import {$getParentOutlineItem} from "@/outline-util";
 
@@ -27,10 +27,10 @@ const emit = defineEmits<{
 
 interface CheckResult {
   success: boolean
-  relativeNode: OutlineNode | OutlineItemNode | OutlineItemContentNode | null
+  relativeNode: LexicalOutlineNode | LexicalOutlineItemNode | LexicalOutlineItemContentNode | null
 }
 
-function $checkOutlineNode(outlineNode: OutlineNode) : CheckResult {
+function $checkOutlineNode(outlineNode: LexicalOutlineNode) : CheckResult {
   // outline的children至少有一个outlineItem，且全部只能是outlineItem
   const outlineChildren = outlineNode.getChildren()
   if (outlineChildren.length === 0) {
@@ -41,7 +41,7 @@ function $checkOutlineNode(outlineNode: OutlineNode) : CheckResult {
     }
   }
   for (const child of outlineChildren) {
-    if (!$isOutlineItemNode(child)) {
+    if (!$isLexicalOutlineItemNode(child)) {
       console.warn('outline children should be outlineItem')
       return {
         success: false,
@@ -50,7 +50,7 @@ function $checkOutlineNode(outlineNode: OutlineNode) : CheckResult {
     }
   }
   for (const outlineChild of outlineChildren) {
-    const result = $checkOutlineItemNode(outlineChild as OutlineItemNode)
+    const result = $checkOutlineItemNode(outlineChild as LexicalOutlineItemNode)
     if (!result.success) {
       return result
     }
@@ -67,8 +67,8 @@ function $checkOutlineNode(outlineNode: OutlineNode) : CheckResult {
  * 没有其他children
  * @param node
  */
-function $checkOutlineItemNode(node: OutlineItemNode) : CheckResult {
-  if (!$isOutlineItemNode(node)) {
+function $checkOutlineItemNode(node: LexicalOutlineItemNode) : CheckResult {
+  if (!$isLexicalOutlineItemNode(node)) {
     console.warn('node should be outlineItem')
     return {
       success: false,
@@ -91,7 +91,7 @@ function $checkOutlineItemNode(node: OutlineItemNode) : CheckResult {
     }
   }
   const [outlineItemContentNode, outlineNode] = children
-  if (!$isOutlineItemContentNode(outlineItemContentNode)) {
+  if (!$isLexicalOutlineItemContentNode(outlineItemContentNode)) {
     console.warn('first of children should be outline-item-content')
     return {
       success: false,
@@ -103,14 +103,14 @@ function $checkOutlineItemNode(node: OutlineItemNode) : CheckResult {
     return result
   }
   if (outlineNode) {
-    if (!$isOutlineNode(outlineNode)) {
+    if (!$isLexicalOutlineNode(outlineNode)) {
       console.warn('second of children should be outline node')
       return {
         success: false,
         relativeNode: node
       }
     }
-    const result = $checkOutlineNode(outlineNode as OutlineNode)
+    const result = $checkOutlineNode(outlineNode as LexicalOutlineNode)
     if (!result.success) {
       return {
         success: false,
@@ -129,8 +129,8 @@ function $checkOutlineItemNode(node: OutlineItemNode) : CheckResult {
  * 可能有第二个child，是一个ElementNode
  * @param node
  */
-function $checkOutlineItemContentNode(node: OutlineItemContentNode) : CheckResult {
-  if (!$isOutlineItemContentNode(node)) {
+function $checkOutlineItemContentNode(node: LexicalOutlineItemContentNode) : CheckResult {
+  if (!$isLexicalOutlineItemContentNode(node)) {
     console.warn('node should be outlineItemContent')
     return {
       success: false,
@@ -147,7 +147,7 @@ function $checkOutlineItemContentNode(node: OutlineItemContentNode) : CheckResul
   }
   const [bulletIconNode, elementNode] = children
 
-  if(!$isBulletIconNode(bulletIconNode)) {
+  if(!$isLexicalBulletIconNode(bulletIconNode)) {
     console.warn('first of children should be a bullet-icon node')
     return {
       success: false,
@@ -183,7 +183,7 @@ useMounted(() => {
         return
       }
       const outlineNode = children[0]
-      if (!$isOutlineNode(outlineNode)) {
+      if (!$isLexicalOutlineNode(outlineNode)) {
         console.warn('first of children should be an outline node')
         check = false
         return
@@ -207,7 +207,7 @@ useMounted(() => {
         if (!outlineItemNode) {
           return
         }
-        const outlineItemContentNode = (outlineItemNode as OutlineItemNode).getOutlineItemContentNode()
+        const outlineItemContentNode = (outlineItemNode as LexicalOutlineItemNode).getOutlineItemContentNode()
         if (!outlineItemContentNode) {
           return
         }
