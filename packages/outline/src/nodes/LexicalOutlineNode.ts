@@ -57,6 +57,7 @@ export class LexicalOutlineNode extends ElementNode {
     if (!this._display) {
       div.style.maxHeight = '0'
       div.style.opacity = '0'
+      div.setAttribute('contenteditable', 'false')
     }
     return div;
   }
@@ -66,9 +67,11 @@ export class LexicalOutlineNode extends ElementNode {
       if (this._display) {
         dom.style.maxHeight = ''
         dom.style.opacity = ''
+        dom.removeAttribute('contenteditable')
       } else {
         dom.style.maxHeight = '0'
         dom.style.opacity = '0'
+        dom.setAttribute('contenteditable', 'false')
       }
       return true;
     }
