@@ -67,7 +67,7 @@ export function $getPreviousOutlineItem(outlineItemNode: LexicalOutlineItemNode)
      *           - outline-item-content
      *             - paragraph                      <-- when backspace as first of this paragraph
      */
-    return previousOutlineItemNode
+    return $getTheLastOutlineItemInOutlineItem(previousOutlineItemNode)
   } else {
     const outlineNode = $getParentOutline(outlineItemNode)
     if (!outlineNode) {
