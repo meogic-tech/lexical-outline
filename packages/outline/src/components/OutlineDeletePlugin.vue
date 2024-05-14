@@ -2,8 +2,8 @@
 import {onMounted, onUnmounted} from "vue";
 import {useEditor} from "lexical-vue";
 import {
-  $getSelection,
-  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH,KEY_DELETE_COMMAND
+  $getSelection, $isElementNode,
+  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH, KEY_DELETE_COMMAND
 } from "lexical";
 import {
   $getOffsetInParent, $getParentOutline,
@@ -45,8 +45,10 @@ function $appendSiblingOutlineItem(
     // 如果有弟弟节点，且它没有子节点，那么应该把它的所有children追加到当前节点的末尾
     const nextSiblingOutlineItemContentElementNode = nextSiblingOutlineItem.getOutlineItemContentNode()?.getTextElementNode()
     const currentOutlineItemContentElementNode = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
-    if (nextSiblingOutlineItemContentElementNode && currentOutlineItemContentElementNode) {
+    if ($isElementNode(nextSiblingOutlineItemContentElementNode) && $isElementNode(currentOutlineItemContentElementNode)) {
       currentOutlineItemContentElementNode.append(...nextSiblingOutlineItemContentElementNode.getChildren())
+    } else {
+      console.debug("nextSiblingOutlineItemContentElementNode or currentOutlineItemContentElementNode is not ElementNode");
     }
     const parentOutline = $getParentOutline(nextSiblingOutlineItem)
     parentOutline?.getChildrenSize() === 1 && parentOutline.remove()
@@ -76,8 +78,10 @@ function $appendFirstChildOutlineItem(
     // 如果有弟弟节点，且它没有子节点，那么应该把它的所有children追加到当前节点的末尾
     const nextSiblingOutlineItemContentElementNode = firstChildOutlineItem.getOutlineItemContentNode()?.getTextElementNode()
     const currentOutlineItemContentElementNode = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
-    if (nextSiblingOutlineItemContentElementNode && currentOutlineItemContentElementNode) {
+    if ($isElementNode(nextSiblingOutlineItemContentElementNode) && $isElementNode(currentOutlineItemContentElementNode)) {
       currentOutlineItemContentElementNode.append(...nextSiblingOutlineItemContentElementNode.getChildren())
+    } else {
+      console.debug("nextSiblingOutlineItemContentElementNode or currentOutlineItemContentElementNode is not ElementNode");
     }
     const parentOutline = $getParentOutline(firstChildOutlineItem)
     parentOutline?.getChildrenSize() === 1 && parentOutline.remove()

@@ -8,10 +8,11 @@ import {
   CannotDeleteErrorCodeType
 } from "@/util";
 import {
-  $getSelection,
+  $createNodeSelection,
+  $getSelection, $isElementNode,
   $isRangeSelection,
-  $isTextNode,
-  COMMAND_PRIORITY_HIGH,
+  $isTextNode, $setSelection,
+  COMMAND_PRIORITY_HIGH, DecoratorNode,
   ElementNode,
   KEY_BACKSPACE_COMMAND
 } from "lexical";
@@ -24,7 +25,7 @@ const emit = defineEmits<{
   (event: 'cannotBackspace', relativeHTMLElement: HTMLElement | null, errorCode: CannotBackspaceErrorCodeType): void;
 }>();
 
-function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineItemNode): ElementNode | null {
+function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineItemNode): ElementNode | DecoratorNode<unknown> | null {
   const outlineItemContentNode = outlineItemNode.getOutlineItemContentNode()
   if (!outlineItemContentNode) {
     return null
@@ -33,7 +34,7 @@ function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineItemNode
    * 现在outlineItemContentNode下第一个是bullet icon node
    * 第二个才是paragraph node之类的
    */
-  const content = outlineItemContentNode.getLastChild()
+  const content = outlineItemContentNode.getTextElementNode()
   if (outlineItemNode.getChildrenSize() === 1) {
     return content as ElementNode | null
   }
@@ -118,7 +119,7 @@ onMounted(() => {
           return true
         }
       }
-      let targetContent: ElementNode | null = null
+      let targetContent: ElementNode | DecoratorNode<unknown> | null = null
       const previousOutlineItemNode = siblingsOutlineItem[index - 1]
       if (previousOutlineItemNode) {
         /**
@@ -154,15 +155,39 @@ onMounted(() => {
           targetContent = parentOutlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
         }
       }
-      targetContent?.selectEnd()
-      const firstContent = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
-      if (firstContent) {
-        targetContent?.append(...firstContent.getChildren())
+
+      if (!targetContent) {
+        console.debug('target content is null')
+        return false
       }
-      outlineNode.getChildrenSize() === 1 && outlineNode.remove()
-      outlineItemNode.remove()
-      event.preventDefault()
-      return true
+
+      const currentContent = outlineItemNode.getOutlineItemContentNode()?.getTextElementNode()
+
+      if (!$isElementNode(targetContent) && $isElementNode(currentContent) && currentContent.getTextContentSize() > 0) {
+        // 当上一个是装饰节点，那么如果当前有内容的话，因为追加不了，所以就直接不处理
+        emit('cannotBackspace', editor.getElementByKey(outlineItemNode.getKey()), CANNOT_BACKSPACE_ERROR_CODE_2)
+        event.preventDefault()
+        return true
+      }
+      if ($isElementNode(targetContent) && $isElementNode(currentContent)) {
+        targetContent?.selectEnd()
+        if (currentContent) {
+          targetContent?.append(...currentContent.getChildren())
+        }
+        outlineNode.getChildrenSize() === 1 && outlineNode.remove()
+        outlineItemNode.remove()
+        event.preventDefault()
+        return true
+      }
+      if (!$isElementNode(targetContent) && $isElementNode(currentContent)) {
+        const nodeSelection = $createNodeSelection();
+        nodeSelection.add(targetContent.__key);
+        $setSelection(nodeSelection);
+        outlineNode.getChildrenSize() === 1 && outlineNode.remove()
+        outlineItemNode.remove()
+        event.preventDefault()
+        return true
+      }
     }
     return false
   }, COMMAND_PRIORITY_HIGH)

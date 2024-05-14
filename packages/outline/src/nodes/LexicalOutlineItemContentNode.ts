@@ -1,4 +1,13 @@
-import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
+import {
+  DecoratorNode,
+  EditorConfig,
+  ElementNode,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
+  SerializedElementNode,
+  Spread
+} from "lexical";
 type NodeId = string
 export type SerializedLexicalOutlineItemContentNode = Spread<
   {
@@ -44,8 +53,8 @@ export class LexicalOutlineItemContentNode extends ElementNode {
   /**
    * 获取用于显示的文本节点
    */
-  getTextElementNode(): ElementNode | null {
-    return this.getChildAtIndex(1) as ElementNode | null
+  getTextElementNode(): ElementNode | DecoratorNode<unknown> | null {
+    return this.getChildAtIndex(1) as ElementNode | DecoratorNode<unknown> | null
   }
 
   /**
