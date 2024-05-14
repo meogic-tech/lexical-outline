@@ -44,6 +44,7 @@ export function $getPreviousOutlineItem(outlineItemNode: LexicalOutlineItemNode)
   const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
   const index = siblingsOutlineItem.indexOf(outlineItemNode)
   const previousOutlineItemNode = siblingsOutlineItem[index - 1]
+  // 先自己这个层级
   if (previousOutlineItemNode) {
     /**
      * 因为是要聚焦上个outlineItem，而它又是可能有子节点的，所以要调用这个来递归获取
@@ -67,8 +68,13 @@ export function $getPreviousOutlineItem(outlineItemNode: LexicalOutlineItemNode)
      *           - outline-item-content
      *             - paragraph                      <-- when backspace as first of this paragraph
      */
+    if (previousOutlineItemNode.getCollapsed()) {
+      // 如果自己折叠了，那么就不需要找自己的子节点了
+      return previousOutlineItemNode
+    }
     return $getTheLastOutlineItemInOutlineItem(previousOutlineItemNode)
   } else {
+    // 说明自己已经是第一个，那么直接返回上一层级
     const outlineNode = $getParentOutline(outlineItemNode)
     if (!outlineNode) {
       console.warn("cannot find parent outline by node", outlineItemNode)
@@ -81,14 +87,28 @@ export function $getPreviousOutlineItem(outlineItemNode: LexicalOutlineItemNode)
 /**
  * 多层级地选中下一个
  * @param outlineItemNode
+ * @param containerChildren 是否选中自己的子节点
  */
-export function $getNextOutlineItem(outlineItemNode: LexicalOutlineItemNode): LexicalOutlineItemNode | null {
+export function $getNextOutlineItem(outlineItemNode: LexicalOutlineItemNode, containerChildren: boolean = true): LexicalOutlineItemNode | null {
+  // 包含要搜索子节点，而且自己没有折叠
+  if (containerChildren && !outlineItemNode.getCollapsed())  {
+    // 先找自己的子层级的第一个
+    const childOutlineNode = outlineItemNode.getChildOutlineNode()
+    if (childOutlineNode) {
+      const firstChild = childOutlineNode.getOutlineItemNodes()[0]
+      if ($isLexicalOutlineItemNode(firstChild)) {
+        return firstChild
+      }
+    }
+  }
   const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
   const index = siblingsOutlineItem.indexOf(outlineItemNode)
+  // 自己当前这一层级
   const nextOutlineItemNode = siblingsOutlineItem[index + 1]
   if (nextOutlineItemNode) {
     return nextOutlineItemNode
   } else {
+    // 没有找到的话则返回上一层级的下一个
     const outlineNode = $getParentOutline(outlineItemNode)
     if (!outlineNode) {
       console.warn("cannot find parent outline by node", outlineItemNode)
@@ -99,7 +119,7 @@ export function $getNextOutlineItem(outlineItemNode: LexicalOutlineItemNode): Le
       console.warn("cannot find parent outline item by node", outlineItemNode)
       return null
     }
-    return $getNextOutlineItem(parentOutlineItem)
+    return $getNextOutlineItem(parentOutlineItem, false)
   }
 
 }

@@ -116,16 +116,6 @@ onMounted(() => {
       return false
     }
 
-    const result = $appendSiblingOutlineItem(event, outlineItemNode, siblingsOutlineItem)
-    if (result) {
-      return true
-    }
-
-    const result2 = $appendFirstChildOutlineItem(event, outlineItemNode, childrenOutlineItemNodes)
-    if (result2) {
-      return true
-    }
-
     const nextOutlineItem = $getNextOutlineItem(outlineItemNode)
     if (nextOutlineItem) {
       const result3 = $appendOtherOutlineItem(event, outlineItemNode, nextOutlineItem)
