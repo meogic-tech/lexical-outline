@@ -1,4 +1,13 @@
-import {EditorConfig, ElementNode, LexicalEditor, LexicalNode, NodeKey, SerializedElementNode, Spread} from "lexical";
+import {
+  EditorConfig,
+  ElementNode,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
+  RangeSelection,
+  SerializedElementNode,
+  Spread
+} from "lexical";
 import {$isLexicalOutlineItemContentNode, LexicalOutlineItemContentNode} from "@/nodes/LexicalOutlineItemContentNode";
 import {$isLexicalOutlineNode, LexicalOutlineNode} from "@/nodes/LexicalOutlineNode";
 export type NodeId = string

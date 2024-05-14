@@ -16,7 +16,12 @@ import {
   ElementNode,
   KEY_BACKSPACE_COMMAND
 } from "lexical";
-import {$getOffsetInParent, $getParentOutline, $getParentOutlineItem} from "@/outline-util";
+import {
+  $getOffsetInParent,
+  $getParentOutline,
+  $getParentOutlineItem,
+  $getTheLastContentInOutlineItem, $getPreviousOutlineItem
+} from "@/outline-util";
 import {$isLexicalOutlineItemNode, LexicalOutlineItemNode} from "@/nodes";
 
 const editor = useEditor()
@@ -25,28 +30,6 @@ const emit = defineEmits<{
   (event: 'cannotBackspace', relativeHTMLElement: HTMLElement | null, errorCode: CannotBackspaceErrorCodeType): void;
 }>();
 
-function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineItemNode): ElementNode | DecoratorNode<unknown> | null {
-  const outlineItemContentNode = outlineItemNode.getOutlineItemContentNode()
-  if (!outlineItemContentNode) {
-    return null
-  }
-  /**
-   * 现在outlineItemContentNode下第一个是bullet icon node
-   * 第二个才是paragraph node之类的
-   */
-  const content = outlineItemContentNode.getTextElementNode()
-  if (outlineItemNode.getChildrenSize() === 1) {
-    return content as ElementNode | null
-  }
-  const childOutlineNode = outlineItemNode.getChildOutlineNode()
-  if (childOutlineNode) {
-    const lastOutlineItemNode = childOutlineNode.getLastChild()
-    if ($isLexicalOutlineItemNode(lastOutlineItemNode)) {
-      return $getTheLastContentInOutlineItem(lastOutlineItemNode)
-    }
-  }
-  return null
-}
 
 onMounted(() => {
   unregisterListener = editor.registerCommand(KEY_BACKSPACE_COMMAND, (event: KeyboardEvent, editor) => {
@@ -63,6 +46,7 @@ onMounted(() => {
     if (!outlineItemNode) {
       return false
     }
+    const previousOutlineItem = $getPreviousOutlineItem(outlineItemNode)
     const siblingsOutlineItem = outlineItemNode.getSiblingsOutlineItemNodes()
     const outlineNode = $getParentOutline(node)
     if (!outlineNode) {
