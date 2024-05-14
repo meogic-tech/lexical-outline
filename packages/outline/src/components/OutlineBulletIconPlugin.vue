@@ -4,10 +4,11 @@
 import {useEditor} from "lexical-vue";
 import {onMounted} from "vue";
 import {
+  $createNodeSelection,
   $createParagraphNode,
-  $getSelection,
-  $isRangeSelection,
-  COMMAND_PRIORITY_LOW, ParagraphNode,
+  $getSelection, $isElementNode,
+  $isRangeSelection, $setSelection,
+  COMMAND_PRIORITY_LOW, DecoratorNode, ElementNode, ParagraphNode,
   SELECTION_CHANGE_COMMAND
 } from "lexical";
 import {$isLexicalBulletIconNode} from "@/nodes";
@@ -23,11 +24,17 @@ onMounted(() => {
     const nodes = selection.getNodes()
     if (nodes.length === 1 && $isLexicalBulletIconNode(nodes[0])) {
       const bulletIconNode = nodes[0]
-      let nextSibling = bulletIconNode.getNextSibling()
+      let nextSibling = bulletIconNode.getNextSibling() as ElementNode | DecoratorNode<unknown> | null
       if (!nextSibling) {
         nextSibling = $createParagraphNode()
       }
-      (nextSibling as ParagraphNode).select(0, 0)
+      if ($isElementNode(nextSibling)) {
+        nextSibling.select(0, 0)
+      } else {
+        const nodeSelection = $createNodeSelection();
+        nodeSelection.add(nextSibling.__key);
+        $setSelection(nodeSelection);
+      }
       return true
     }
     for (let i = 0; i < nodes.length; i++) {
