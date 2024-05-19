@@ -1,4 +1,7 @@
 import {
+  $createLexicalBulletIconNode,
+  $createLexicalOutlineItemContentNode,
+  $createLexicalOutlineItemNode,
   $isLexicalOutlineItemContentNode,
   $isLexicalOutlineItemNode,
   $isLexicalOutlineNode,
@@ -6,7 +9,16 @@ import {
   LexicalOutlineItemNode,
   LexicalOutlineNode
 } from "@/nodes";
-import {$isRootNode, DecoratorNode, ElementNode, LexicalNode} from "lexical";
+import {
+  $isRangeSelection,
+  $isRootNode,
+  $isTextNode,
+  BaseSelection,
+  DecoratorNode,
+  ElementNode,
+  LexicalNode, ParagraphNode,
+  TextNode
+} from "lexical";
 import {CANNOT_BACKSPACE_ERROR_CODE_3} from "@/util";
 
 export function $getParentOutline(node: LexicalNode): LexicalOutlineNode | null {
@@ -150,13 +162,43 @@ export function $getTheLastContentInOutlineItem(outlineItemNode: LexicalOutlineI
 }
 
 
-/**
- * (1) outline
- *     ├ (2) outline-item
- *     | ├ (3) bullet-icon
- *     | └ (4) outline-item-content
- *     |   ├ (5) heading
- *     |   | └ (6) text  "Welcome to the playground"
- *     |   ├ (15) outline
- * @param node
- */
+export function $addNewOutlineItemNode(
+  selection: BaseSelection,
+  anchor: DecoratorNode<unknown> | ElementNode | TextNode,
+  createParagraphNode: () => ElementNode,
+  getNewOutlineItemId: () => string,
+) {
+  const newParagraphNode = createParagraphNode()
+  const parentOutlineItemNode = $getParentOutlineItem(anchor)
+  if (parentOutlineItemNode === null) {
+    console.warn('cannot find parent outline item node', anchor)
+    return false
+  }
+  if ($isTextNode(anchor) && $isRangeSelection(selection)) {
+    const anchorOffset = selection.anchor.offset
+    let nodesToMove: LexicalNode[] = [];
+    nodesToMove = anchor.getNextSiblings().reverse();
+    const textContentLength = anchor.getTextContentSize();
+    if (anchorOffset === 0) {
+      nodesToMove.push(anchor);
+    } else if (anchorOffset !== textContentLength) {
+      const [, splitNode] = anchor.splitText(anchorOffset);
+      nodesToMove.push(splitNode);
+    }
+    for (let i = nodesToMove.length - 1; i >= 0; i--) {
+      newParagraphNode.append(nodesToMove[i]);
+    }
+  }
+  const outlineItemNode = $createLexicalOutlineItemNode(getNewOutlineItemId(), false)
+  outlineItemNode
+    .append($createLexicalOutlineItemContentNode()
+      .append($createLexicalBulletIconNode(false))
+      .append(newParagraphNode))
+  const childOutline = parentOutlineItemNode.getChildOutlineNode()
+  if (childOutline && !parentOutlineItemNode.getCollapsed()) {
+    childOutline.splice(0, 0, [outlineItemNode])
+  } else {
+    parentOutlineItemNode.insertAfter(outlineItemNode)
+  }
+  newParagraphNode.select(0, 0)
+}

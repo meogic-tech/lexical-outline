@@ -7,13 +7,14 @@ import {
   $isRangeSelection, $isTextNode, BaseSelection, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW, DecoratorNode, ElementNode,
   INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, KEY_DOWN_COMMAND,
-  KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
+  KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, ParagraphNode, RangeSelection, TextNode,
 } from "lexical";
 import {mergeRegister} from '@lexical/utils';
 import {$createLexicalBulletIconNode, $isLexicalBulletIconNode} from "@/nodes/LexicalBulletIconNode";
 import {$createLexicalOutlineItemNode, $isLexicalOutlineItemNode, NodeId, LexicalOutlineItemNode} from "@/nodes/LexicalOutlineItemNode";
 import {$createLexicalOutlineNode, $isLexicalOutlineNode, LexicalOutlineNode} from "@/nodes/LexicalOutlineNode";
 import {
+  $addNewOutlineItemNode,
   $getOffsetInParent,
   $getParentOutline, $getParentOutlineItem,
 } from "@/outline-util";
@@ -30,7 +31,7 @@ import {
 
 const editor = useEditor()
 const props = defineProps<{
-  createParagraphNode: typeof $createParagraphNode | undefined
+  createParagraphNode: (() => ElementNode) | undefined
   getNewOutlineItemId: () => NodeId
   isCodeNode: (node: ElementNode | TextNode | null) => boolean
 }>()
@@ -164,41 +165,6 @@ const onClick = (event: MouseEvent) => {
   }
 }
 
-function $addNewOutlineItemNode(selection: BaseSelection, anchor: DecoratorNode<unknown> | ElementNode | TextNode) {
-  const newParagraphNode = internal$CreateParagraphNode()
-  const parentOutlineItemNode = $getParentOutlineItem(anchor)
-  if (parentOutlineItemNode === null) {
-    console.warn('cannot find parent outline item node', anchor)
-    return false
-  }
-  if ($isTextNode(anchor) && $isRangeSelection(selection)) {
-    const anchorOffset = selection.anchor.offset
-    let nodesToMove: LexicalNode[] = [];
-    nodesToMove = anchor.getNextSiblings().reverse();
-    const textContentLength = anchor.getTextContentSize();
-    if (anchorOffset === 0) {
-      nodesToMove.push(anchor);
-    } else if (anchorOffset !== textContentLength) {
-      const [, splitNode] = anchor.splitText(anchorOffset);
-      nodesToMove.push(splitNode);
-    }
-    for (let i = nodesToMove.length - 1; i >= 0; i--) {
-      newParagraphNode.append(nodesToMove[i]);
-    }
-  }
-  const outlineItemNode = $createLexicalOutlineItemNode(props.getNewOutlineItemId(), false)
-  outlineItemNode
-      .append($createLexicalOutlineItemContentNode()
-          .append($createLexicalBulletIconNode(false))
-          .append(newParagraphNode))
-  const childOutline = parentOutlineItemNode.getChildOutlineNode()
-  if (childOutline && !parentOutlineItemNode.getCollapsed()) {
-    childOutline.splice(0, 0, [outlineItemNode])
-  } else {
-    parentOutlineItemNode.insertAfter(outlineItemNode)
-  }
-  newParagraphNode.select(0, 0)
-}
 
 onMounted(() => {
   editor.getRootElement()!.addEventListener('click', onClick)
@@ -266,7 +232,7 @@ onMounted(() => {
            */
           children[childrenLength - 1].remove()
           children[childrenLength - 2].remove()
-          $addNewOutlineItemNode(selection, anchor)
+          $addNewOutlineItemNode(selection, anchor, internal$CreateParagraphNode, props.getNewOutlineItemId)
           return true
         }
         /**
@@ -291,7 +257,7 @@ onMounted(() => {
       /**
        * 处理和代码块无关的情况
        */
-      $addNewOutlineItemNode(selection, anchor)
+      $addNewOutlineItemNode(selection, anchor, internal$CreateParagraphNode, props.getNewOutlineItemId)
       return true
     }, COMMAND_PRIORITY_HIGH),
     editor.registerCommand(KEY_TAB_COMMAND, (event: KeyboardEvent, editor) => {
