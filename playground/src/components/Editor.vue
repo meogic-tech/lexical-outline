@@ -10,7 +10,7 @@ import {
   LexicalListPlugin,
   LexicalRichTextPlugin,
   LexicalTreeViewPlugin,
-  LexicalMarkdownShortcutPlugin
+  LexicalMarkdownShortcutPlugin,
 } from 'lexical-vue'
 import {TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS, HEADING, QUOTE, CODE} from '@lexical/markdown'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
@@ -37,7 +37,6 @@ import {
 import {onUnmounted,onMounted} from 'vue'
 import {
   NewBulletIconNode as NewBulletIconNode,
-  $createBulletIconNode as new$createLexicalBulletIconNode,
   $createNewBulletIconNode
 } from "@/nodes/NewBulletIconNode";
 

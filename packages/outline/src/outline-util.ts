@@ -172,7 +172,7 @@ export function $addNewOutlineItemNode(
   const parentOutlineItemNode = $getParentOutlineItem(anchor)
   if (parentOutlineItemNode === null) {
     console.warn('cannot find parent outline item node', anchor)
-    return false
+    return null
   }
   if ($isTextNode(anchor) && $isRangeSelection(selection)) {
     const anchorOffset = selection.anchor.offset
@@ -201,4 +201,5 @@ export function $addNewOutlineItemNode(
     parentOutlineItemNode.insertAfter(outlineItemNode)
   }
   newParagraphNode.select(0, 0)
+  return newParagraphNode
 }

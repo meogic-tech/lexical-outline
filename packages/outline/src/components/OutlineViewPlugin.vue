@@ -31,9 +31,9 @@ import {
 
 const editor = useEditor()
 const props = defineProps<{
-  createParagraphNode: (() => ElementNode) | undefined
+  createParagraphNode?: (() => ElementNode) | undefined
   getNewOutlineItemId: () => NodeId
-  isCodeNode: (node: ElementNode | TextNode | null) => boolean
+  isCodeNode?: (node: ElementNode | TextNode | null) => boolean
 }>()
 let unregister: () => void
 
