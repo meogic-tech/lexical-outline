@@ -3,9 +3,9 @@ import {onMounted, onUnmounted} from "vue";
 import {useEditor} from "lexical-vue";
 import {
   $createParagraphNode, $getNodeByKey,
-  $getSelection, $isElementNode,
-  $isRangeSelection, $isTextNode, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
-  COMMAND_PRIORITY_LOW, ElementNode,
+  $getSelection, $isDecoratorNode, $isElementNode, $isNodeSelection,
+  $isRangeSelection, $isTextNode, BaseSelection, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH,
+  COMMAND_PRIORITY_LOW, DecoratorNode, ElementNode,
   INSERT_PARAGRAPH_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND, KEY_TAB_COMMAND, LexicalNode, RangeSelection, TextNode,
 } from "lexical";
@@ -164,14 +164,14 @@ const onClick = (event: MouseEvent) => {
   }
 }
 
-function $addNewOutlineItemNode(selection: RangeSelection, anchor: ElementNode | TextNode) {
+function $addNewOutlineItemNode(selection: BaseSelection, anchor: DecoratorNode<unknown> | ElementNode | TextNode) {
   const newParagraphNode = internal$CreateParagraphNode()
   const parentOutlineItemNode = $getParentOutlineItem(anchor)
   if (parentOutlineItemNode === null) {
     console.warn('cannot find parent outline item node', anchor)
     return false
   }
-  if ($isTextNode(anchor)) {
+  if ($isTextNode(anchor) && $isRangeSelection(selection)) {
     const anchorOffset = selection.anchor.offset
     let nodesToMove: LexicalNode[] = [];
     nodesToMove = anchor.getNextSiblings().reverse();
@@ -222,13 +222,29 @@ onMounted(() => {
     }, COMMAND_PRIORITY_LOW),
     editor.registerCommand(INSERT_PARAGRAPH_COMMAND, (payload, editor) => {
       const selection = $getSelection()
-      if (!$isRangeSelection(selection)) {
-        console.warn('not range selection when insert paragraph')
+      if (!selection) {
         return false
       }
-      const anchor = selection.anchor.getNode()
+      let anchor: DecoratorNode<unknown> | ElementNode | TextNode | null = null
+      if (!$isRangeSelection(selection)) {
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes()
+          const firstNode = nodes[0]
+          if (firstNode && $isDecoratorNode(firstNode) &&
+              !firstNode.isIsolated() && !firstNode.isInline() && firstNode.isKeyboardSelectable()
+          ) {
+            anchor = firstNode
+          }
+        }
+        if (!anchor) {
+          console.warn('not range selection when insert paragraph')
+          return false
+        }
+      } else {
+        anchor = selection.anchor.getNode()
+      }
       //region 处理和代码块相关的换行
-      if (internal$isCodeNode(anchor)) {
+      if ($isElementNode(anchor) && $isRangeSelection(selection) && internal$isCodeNode(anchor)) {
         /**
          * 当前选中了code节点，则说明当前其实光标显示在新的一行上
          */
@@ -264,7 +280,7 @@ onMounted(() => {
         return true
       }
       const parent = anchor.getParent()
-      if (internal$isCodeNode(parent)) {
+      if ($isElementNode(parent) && $isRangeSelection(selection) && internal$isCodeNode(parent)) {
         /**
          * 这里时最普通的情况，在高亮代码中进行了回车，然后应该触发拆分高亮代码节点
          */
