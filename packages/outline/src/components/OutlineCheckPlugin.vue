@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useEditor, useMounted} from "lexical-vue";
-import {$getRoot, $getSelection, $isElementNode, $isRangeSelection, ElementNode} from "lexical";
+import {$getRoot, $getSelection, $isDecoratorNode, $isElementNode, $isRangeSelection, ElementNode} from "lexical";
 import {
   $isLexicalBulletIconNode,
   $isLexicalOutlineItemContentNode,
@@ -62,8 +62,8 @@ function $checkOutlineNode(outlineNode: LexicalOutlineNode) : CheckResult {
 }
 
 /**
- * 第一个children必须是bullet-icon
- * 第二个children必须是outline-item-content
+ * 第一个children必须是outline-item-content
+ * 第二个children必须是outline
  * 没有其他children
  * @param node
  */
@@ -138,14 +138,14 @@ function $checkOutlineItemContentNode(node: LexicalOutlineItemContentNode) : Che
     }
   }
   const children = node.getChildren()
-  if (children.length === 0 || children.length > 2) {
-    console.warn('outlineItemContent should have at least one child and at most two children')
+  if (children.length !== 2) {
+    console.warn('outlineItemContent should have must two children')
     return {
       success: false,
       relativeNode: node
     }
   }
-  const [bulletIconNode, elementNode] = children
+  const [bulletIconNode, elementOrDecoratorNode] = children
 
   if(!$isLexicalBulletIconNode(bulletIconNode)) {
     console.warn('first of children should be a bullet-icon node')
@@ -155,9 +155,9 @@ function $checkOutlineItemContentNode(node: LexicalOutlineItemContentNode) : Che
     }
   }
 
-  if (elementNode) {
-    if (!$isElementNode(bulletIconNode)) {
-      console.warn('second of children should be an element node')
+  if (elementOrDecoratorNode) {
+    if (!$isElementNode(elementOrDecoratorNode) && !$isDecoratorNode(elementOrDecoratorNode)) {
+      console.warn('second of children should be an element node or decorator node')
       return {
         success: false,
         relativeNode: node

@@ -16,7 +16,7 @@ import {$createLexicalOutlineNode, $isLexicalOutlineNode, LexicalOutlineNode} fr
 import {
   $addNewOutlineItemNode,
   $getOffsetInParent,
-  $getParentOutline, $getParentOutlineItem,
+  $getParentOutline, $getParentOutlineItem, $indentOutlineItemNode, $outdentOutlineItemNode,
 } from "@/outline-util";
 import {$createLexicalOutlineItemContentNode, LexicalOutlineItemContentNode} from "@/nodes";
 import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
@@ -57,20 +57,7 @@ function indent(): boolean {
     if (!outlineItemNode) {
       return false
     }
-    const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
-    if ($isLexicalOutlineItemNode(outlineItemNode) && $isLexicalOutlineItemNode(previousOutlineItemNode)) {
-      let outlineNode = previousOutlineItemNode.getChildOutlineNode()
-      if (!outlineNode) {
-        outlineNode = $createLexicalOutlineNode(true)
-        previousOutlineItemNode.append(outlineNode)
-      }
-      outlineNode.append(outlineItemNode)
-      editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
-        outlineItemKey: previousOutlineItemNode.getKey(),
-        collapsed: false
-      })
-      return true
-    }
+    return $indentOutlineItemNode(editor, outlineItemNode)
   }
   return false
 }
@@ -105,20 +92,7 @@ function outdent(): boolean {
     if (!currentOutlineItemNode) {
       return false
     }
-    const outlineNode = $getParentOutline(firstNode)
-    if (!outlineNode) {
-      return false
-    }
-    const parentOutlineItemNode = $getParentOutlineItem(outlineNode)
-    if (!parentOutlineItemNode) {
-      return false
-    }
-    // parentOutlineNode.setCollapsed(false)
-    parentOutlineItemNode.insertAfter(currentOutlineItemNode)
-    if (outlineNode.getOutlineItemNodes().length === 0) {
-      outlineNode.remove()
-    }
-    return true
+    return $outdentOutlineItemNode(currentOutlineItemNode)
   }
   return false
 }

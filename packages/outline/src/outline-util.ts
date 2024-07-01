@@ -1,7 +1,7 @@
 import {
   $createLexicalBulletIconNode,
   $createLexicalOutlineItemContentNode,
-  $createLexicalOutlineItemNode,
+  $createLexicalOutlineItemNode, $createLexicalOutlineNode,
   $isLexicalOutlineItemContentNode,
   $isLexicalOutlineItemNode,
   $isLexicalOutlineNode,
@@ -10,16 +10,18 @@ import {
   LexicalOutlineNode
 } from "@/nodes";
 import {
+  $getSelection,
   $isRangeSelection,
   $isRootNode,
   $isTextNode,
   BaseSelection,
   DecoratorNode,
-  ElementNode,
+  ElementNode, LexicalEditor,
   LexicalNode, ParagraphNode,
   TextNode
 } from "lexical";
 import {CANNOT_BACKSPACE_ERROR_CODE_3} from "@/util";
+import {COLLAPSE_OUTLINE_COMMAND} from "@/commands";
 
 export function $getParentOutline(node: LexicalNode): LexicalOutlineNode | null {
   const parent = node.getParent();
@@ -202,4 +204,39 @@ export function $addNewOutlineItemNode(
   }
   newParagraphNode.select(0, 0)
   return newParagraphNode
+}
+
+export function $indentOutlineItemNode(editor: LexicalEditor, outlineItemNode: LexicalOutlineItemNode) {
+  const previousOutlineItemNode = outlineItemNode.getPreviousSibling()
+  if ($isLexicalOutlineItemNode(outlineItemNode) && $isLexicalOutlineItemNode(previousOutlineItemNode)) {
+    let outlineNode = previousOutlineItemNode.getChildOutlineNode()
+    if (!outlineNode) {
+      outlineNode = $createLexicalOutlineNode(true)
+      previousOutlineItemNode.append(outlineNode)
+    }
+    outlineNode.append(outlineItemNode)
+    editor.dispatchCommand(COLLAPSE_OUTLINE_COMMAND, {
+      outlineItemKey: previousOutlineItemNode.getKey(),
+      collapsed: false
+    })
+    return true
+  }
+  return false
+}
+
+export function $outdentOutlineItemNode(outlineItemNode: LexicalOutlineItemNode) {
+  const outlineNode = $getParentOutline(outlineItemNode)
+  if (!outlineNode) {
+    return false
+  }
+  const parentOutlineItemNode = $getParentOutlineItem(outlineNode)
+  if (!parentOutlineItemNode) {
+    return false
+  }
+  // parentOutlineNode.setCollapsed(false)
+  parentOutlineItemNode.insertAfter(outlineItemNode)
+  if (outlineNode.getOutlineItemNodes().length === 0) {
+    outlineNode.remove()
+  }
+  return true
 }
